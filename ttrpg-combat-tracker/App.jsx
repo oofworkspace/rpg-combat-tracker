@@ -24,10 +24,9 @@ export default function App() {
   const [hp, setHp] = useState(24);
   const [thp, setThp] = useState(0);
   
-  // Consolidated AC Backing Values
-  const [baseAc, setBaseAc] = useState(2);
+  // Streamlined Armor Class States
+  const [baseAc, setBaseAc] = useState(12);
   const [tempAc, setTempAc] = useState(0);
-  const [totalAcMod, setTotalAcMod] = useState(0);
 
   // Class Currency / Adaptable MP Asset Engine (Higher Thresholds)
   const [resourceLabel, setResourceLabel] = useState('MP');
@@ -94,7 +93,7 @@ export default function App() {
 
   // Dynamic Rule Calculation Engine
   const isPurgedActive = statusEffects.find(s => s.name === 'Purge')?.active;
-  const computedTotalAc = baseAc + tempAc + totalAcMod;
+  const computedTotalAc = baseAc + tempAc;
   const finalCalculatedAc = isPurgedActive ? Math.max(0, computedTotalAc - 2) : computedTotalAc;
 
   // Programmable Dice Roller
@@ -245,36 +244,47 @@ export default function App() {
             <span className="text-[9px] text-purple-600 font-medium">Class Drive</span>
           </div>
 
-          {/* CONSOLIDATED UNIFIED ARMOR CLASS CONSOLE */}
+          {/* STREAMLINED TWO-INPUT ARMOR CLASS CONSOLE */}
           <div className={`border rounded-xl p-3 flex flex-col justify-between transition-all col-span-2 sm:col-span-2 lg:col-span-3 shadow-md ${
             isPurgedActive ? 'bg-red-950/20 border-red-500' : 'bg-blue-950/10 border-blue-900/50'
           }`}>
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block text-left">Armor Class Profile</span>
             
             <div className="flex items-center justify-between gap-3 my-1">
-              {/* Giant Auto-Updating Absolute Monitor Box */}
-              <div className="flex flex-col items-center justify-center bg-[#0b111e]/90 border border-slate-800 rounded-xl p-1.5 min-w-[65px] h-12 shrink-0 shadow-inner">
-                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-tight">Total AC</span>
-                <span className={`text-xl font-black leading-none ${isPurgedActive ? 'text-red-400 animate-pulse' : 'text-blue-400'}`}>
+              {/* Bold Current AC Calculated HUD */}
+              <div className="flex flex-col items-center justify-center bg-[#0b111e]/90 border border-slate-800 rounded-xl p-1.5 min-w-[70px] h-12 shrink-0 shadow-inner">
+                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tight">Current AC</span>
+                <span className={`text-xl font-black leading-none ${isPurgedActive ? 'text-red-400 animate-pulse' : 'text-teal-400'}`}>
                   {finalCalculatedAc}
                 </span>
               </div>
 
-              {/* Integrated Nested Inputs Deck */}
-              <div className="grid grid-cols-3 gap-1.5 w-full">
-                <div className="bg-[#0b111e]/60 border border-slate-800 p-1 rounded-lg text-center">
-                  <span className="text-[8px] font-bold text-slate-500 block uppercase">Base</span>
-                  <input type="number" value={baseAc} onChange={(e) => setBaseAc(Number(e.target.value))} className="bg-transparent text-xs font-black text-center w-full focus:outline-none text-slate-200" />
+              {/* Precise Dual Control Terminal */}
+              <div className="grid grid-cols-2 gap-2 w-full">
+                {/* Manual Base AC Input for Leveling */}
+                <div className="bg-[#0b111e]/60 border border-slate-800 p-1 rounded-lg text-center flex flex-col justify-between h-12">
+                  <span className="text-[8px] font-bold text-slate-500 block uppercase">Base AC</span>
+                  <input 
+                    type="number" 
+                    value={baseAc} 
+                    onChange={(e) => setBaseAc(Number(e.target.value))} 
+                    className="bg-transparent text-xs font-black text-center w-full focus:outline-none text-slate-200" 
+                  />
                 </div>
                 
-                <div className="bg-[#0b111e]/60 border border-slate-800 p-1 rounded-lg text-center">
-                  <span className="text-[8px] font-bold text-slate-500 block uppercase">Temp</span>
-                  <input type="number" value={tempAc} onChange={(e) => setTempAc(Number(e.target.value))} className="bg-transparent text-xs font-black text-center w-full focus:outline-none text-teal-400" />
-                </div>
-
-                <div className="bg-[#0b111e]/60 border border-slate-800 p-1 rounded-lg text-center">
-                  <span className="text-[8px] font-bold text-slate-500 block uppercase">Mod</span>
-                  <input type="number" value={totalAcMod} onChange={(e) => setTotalAcMod(Number(e.target.value))} className="bg-transparent text-xs font-black text-center w-full focus:outline-none text-emerald-400" />
+                {/* Temp AC + / - Incrementor */}
+                <div className="bg-[#0b111e]/60 border border-slate-800 p-1 rounded-lg text-center flex flex-col justify-between h-12">
+                  <span className="text-[8px] font-bold text-slate-500 block uppercase">Temp AC</span>
+                  <div className="flex items-center justify-between w-full px-1">
+                    <button type="button" onClick={() => setTempAc(prev => prev - 1)} className="text-xs font-black text-teal-500 hover:text-teal-400 px-0.5">-</button>
+                    <input 
+                      type="number" 
+                      value={tempAc} 
+                      onChange={(e) => setTempAc(Number(e.target.value))} 
+                      className="bg-transparent text-xs font-black text-center w-6 focus:outline-none text-teal-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                    />
+                    <button type="button" onClick={() => setTempAc(prev => prev + 1)} className="text-xs font-black text-teal-500 hover:text-teal-400 px-0.5">+</button>
+                  </div>
                 </div>
               </div>
             </div>
