@@ -1,22 +1,24 @@
 import { useState } from 'react';
 
 const CLASS_DATA = {
+  Adept: { stat: 'Agility', weakness: 'Wind / Daze', minor: 'Move', color: 'border-amber-600 bg-amber-950/30 text-amber-400' },
   Defender: { stat: 'Vitality', weakness: 'Sand / Daze', minor: 'Defend', color: 'border-slate-600 bg-slate-900/40 text-slate-300' },
   Warrior: { stat: 'Might', weakness: 'Light / Panic', minor: 'Cleave', color: 'border-purple-600 bg-purple-950/30 text-purple-400' },
-  Adept: { stat: 'Agility', weakness: 'Wind / Daze', minor: 'Move', color: 'border-amber-600 bg-amber-950/30 text-amber-400' },
   Creator: { stat: 'Ingenuity', weakness: 'Water / Ignite', minor: 'Steady', color: 'border-red-600 bg-red-950/30 text-red-400' },
   Mender: { stat: 'Awareness', weakness: 'Shadow / Blind', minor: 'Take Cover', color: 'border-yellow-500 bg-yellow-950/30 text-yellow-400' },
   Mancer: { stat: 'Spirit', weakness: 'Fire / Purged', minor: 'Resist', color: 'border-blue-600 bg-blue-950/30 text-blue-400' },
 };
 
+const ARCHETYPES = ['Entertainer', 'Hero', 'Inventor', 'Outlaw', 'Scholar', 'Survivor'];
+
 export default function App() {
   // Identity Block
-  const [name, setName] = useState('Argylle (Ryan)');
+  const [name, setName] = useState('');
   const [level, setLevel] = useState(2);
-  const [archetype, setArchetype] = useState('Defender');
-  const [subClass, setSubClass] = useState('Survivor');
+  const [classSelection, setClassSelection] = useState('Adept');
+  const [archetypeSelection, setArchetypeSelection] = useState('Outlaw');
 
-  // Vitals State Matrix (All completely editable)
+  // Vitals State Matrix
   const [wounds, setWounds] = useState(0);
   const [maxHp, setMaxHp] = useState(24);
   const [hp, setHp] = useState(24);
@@ -111,7 +113,7 @@ export default function App() {
   };
 
   const cycleStatState = (e, statName) => {
-    e.stopPropagation(); // Stop from firing the card's main increment click
+    e.stopPropagation();
     const states = ['Normal', 'Weak', 'Mastered'];
     const current = stats[statName].state;
     const nextIndex = (states.indexOf(current) + 1) % states.length;
@@ -144,7 +146,8 @@ export default function App() {
             <div className="flex flex-wrap items-baseline gap-3">
               <input 
                 type="text" value={name} onChange={(e) => setName(e.target.value)}
-                className="bg-transparent text-2xl font-black text-white focus:outline-none border-b border-transparent hover:border-gray-700 focus:border-emerald-500 transition pb-0.5"
+                placeholder="Enter Character Name..."
+                className="bg-transparent text-2xl font-black text-white focus:outline-none border-b border-transparent hover:border-gray-700 focus:border-emerald-500 transition pb-0.5 placeholder-gray-700 min-w-[240px]"
               />
               <div className="flex items-center gap-1.5 bg-gray-950 border border-gray-800 px-2 py-0.5 rounded-lg text-xs">
                 <span className="text-gray-500 font-bold">LVL</span>
@@ -154,59 +157,86 @@ export default function App() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-            <select value={archetype} onChange={(e) => setArchetype(e.target.value)} className="bg-gray-950 border border-gray-800 text-xs font-black rounded-xl p-2 text-emerald-400 focus:outline-none">
+            <select value={classSelection} onChange={(e) => setClassSelection(e.target.value)} className="bg-gray-950 border border-gray-800 text-xs font-black rounded-xl p-2 text-emerald-400 focus:outline-none">
               {Object.keys(CLASS_DATA).map(cls => <option key={cls} value={cls}>{cls}</option>)}
             </select>
-            <input type="text" value={subClass} onChange={(e) => setSubClass(e.target.value)} className="bg-gray-950 border border-gray-800 text-xs font-bold rounded-xl p-2 text-gray-300 w-28 text-center focus:outline-none" />
+            
+            {/* NEW AUTOMATED ARCHETYPE DROPDOWN */}
+            <select value={archetypeSelection} onChange={(e) => setArchetypeSelection(e.target.value)} className="bg-gray-950 border border-gray-800 text-xs font-black rounded-xl p-2 text-gray-300 focus:outline-none">
+              {ARCHETYPES.map(arch => <option key={arch} value={arch}>{arch}</option>)}
+            </select>
             
             <div className="bg-rose-950/30 border border-rose-900/60 p-2 rounded-xl text-center min-w-[120px]">
               <span className="text-[9px] font-bold uppercase tracking-wider text-rose-400 block">Weakness Grid</span>
-              <span className="text-xs font-black text-rose-300">{CLASS_DATA[archetype].weakness}</span>
+              <span className="text-xs font-black text-rose-300">{CLASS_DATA[classSelection].weakness}</span>
             </div>
           </div>
         </header>
 
-        {/* ROW 2: CRITICAL VITALS MATRIX (All Inputs are fully mutable) */}
+        {/* ROW 2: CRITICAL VITALS MATRIX (With New Micro-Increment Steppers) */}
         <section className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3">
           
+          {/* Wounds Module */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Wounds</span>
-            <input type="number" value={wounds} onChange={(e) => setWounds(Number(e.target.value))} className={`bg-transparent text-xl font-black text-center w-full focus:outline-none my-1 ${wounds > 0 ? 'text-red-400 animate-pulse' : 'text-gray-300'}`} />
+            <div className="flex items-center justify-between bg-gray-950 rounded-lg p-1 border border-gray-800 my-1">
+              <button type="button" onClick={() => setWounds(Math.max(0, wounds - 1))} className="text-xs font-black text-gray-500 hover:text-white px-1.5">-</button>
+              <input type="number" value={wounds} onChange={(e) => setWounds(Number(e.target.value))} className={`bg-transparent text-sm font-black text-center w-full focus:outline-none ${wounds > 0 ? 'text-red-400' : 'text-gray-300'}`} />
+              <button type="button" onClick={() => setWounds(wounds + 1)} className="text-xs font-black text-gray-500 hover:text-white px-1.5">+</button>
+            </div>
             <span className="text-[9px] text-gray-600 font-medium">Injuries</span>
           </div>
 
+          {/* Max HP Stat Container */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Max HP</span>
             <input type="number" value={maxHp} onChange={(e) => setMaxHp(Number(e.target.value))} className="bg-transparent text-xl font-black text-gray-300 text-center w-full focus:outline-none my-1" />
             <span className="text-[9px] text-gray-600 font-medium">Ceiling Pool</span>
           </div>
 
+          {/* Current HP Card (with manual step bars) */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Current HP</span>
-            <input type="number" value={hp} onChange={(e) => setHp(Number(e.target.value))} className="bg-transparent text-2xl font-black text-rose-400 text-center w-full focus:outline-none my-0.5" />
-            <div className="w-full bg-gray-950 h-1.5 rounded-full overflow-hidden">
+            <div className="flex items-center justify-between bg-gray-950 rounded-lg p-1 border border-gray-800 my-1">
+              <button type="button" onClick={() => setHp(Math.max(0, hp - 1))} className="text-xs font-black text-rose-500 hover:text-rose-400 px-1.5">-</button>
+              <input type="number" value={hp} onChange={(e) => setHp(Number(e.target.value))} className="bg-transparent text-sm font-black text-center w-full focus:outline-none text-rose-400" />
+              <button type="button" onClick={() => setHp(hp + 1)} className="text-xs font-black text-rose-500 hover:text-rose-400 px-1.5">+</button>
+            </div>
+            <div className="w-full bg-gray-950 h-1 rounded-full overflow-hidden mt-0.5">
               <div className="bg-rose-500 h-full transition-all duration-300" style={{ width: `${Math.min(100, Math.max(0, (hp / maxHp) * 100))}%` }}></div>
             </div>
           </div>
 
+          {/* Temporary HP Card (with manual step bars) */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Temp HP</span>
-            <input type="number" value={thp} onChange={(e) => setThp(Number(e.target.value))} className="bg-transparent text-xl font-black text-sky-400 text-center w-full focus:outline-none my-1" />
+            <div className="flex items-center justify-between bg-gray-950 rounded-lg p-1 border border-gray-800 my-1">
+              <button type="button" onClick={() => setThp(Math.max(0, thp - 1))} className="text-xs font-black text-sky-500 hover:text-sky-400 px-1.5">-</button>
+              <input type="number" value={thp} onChange={(e) => setThp(Number(e.target.value))} className="bg-transparent text-sm font-black text-center w-full focus:outline-none text-sky-400" />
+              <button type="button" onClick={() => setThp(thp + 1)} className="text-xs font-black text-sky-500 hover:text-sky-400 px-1.5">+</button>
+            </div>
             <span className="text-[9px] text-sky-600 font-medium">Shielding</span>
           </div>
 
+          {/* Base AC Card */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Base AC</span>
             <input type="number" value={baseAc} onChange={(e) => setBaseAc(Number(e.target.value))} className="bg-transparent text-xl font-black text-blue-400 text-center w-full focus:outline-none my-1" />
             <span className="text-[9px] text-gray-600 font-medium">Static Armor</span>
           </div>
 
+          {/* TAC Asset Card (with manual step bars) */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">TAC Asset</span>
-            <input type="number" value={tac} onChange={(e) => setTac(Number(e.target.value))} className="bg-transparent text-xl font-black text-teal-400 text-center w-full focus:outline-none my-1" />
+            <div className="flex items-center justify-between bg-gray-950 rounded-lg p-1 border border-gray-800 my-1">
+              <button type="button" onClick={() => setTac(Math.max(0, tac - 1))} className="text-xs font-black text-teal-500 hover:text-teal-400 px-1.5">-</button>
+              <input type="number" value={tac} onChange={(e) => setTac(Number(e.target.value))} className="bg-transparent text-sm font-black text-center w-full focus:outline-none text-teal-400" />
+              <button type="button" onClick={() => setTac(tac + 1)} className="text-xs font-black text-teal-500 hover:text-teal-400 px-1.5">+</button>
+            </div>
             <span className="text-[9px] text-teal-600 font-medium">Deflections</span>
           </div>
 
+          {/* Calculated Total AC Card */}
           <div className={`border rounded-xl p-3 text-center flex flex-col justify-between transition-all col-span-2 sm:col-span-1 ${isPurgedActive ? 'bg-red-950/40 border-red-500 animate-pulse' : 'bg-emerald-950/20 border-emerald-800'}`}>
             <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 block">Total AC</span>
             <span className={`text-2xl font-black block my-0.5 ${isPurgedActive ? 'text-red-400' : 'text-emerald-400'}`}>{finalCalculatedAc}</span>
@@ -215,7 +245,7 @@ export default function App() {
 
         </section>
 
-        {/* INTERACTIVE ROLLING ENGINE CONSOLE FEED */}
+        {/* TERMINAL FEED MONITOR */}
         <div className="bg-gray-950 border border-gray-800 px-4 py-3 rounded-xl flex justify-between items-center text-xs shadow-inner">
           <div className="flex gap-2 items-center">
             <span className="text-gray-500 font-bold uppercase tracking-wider">Console Terminal:</span>
@@ -256,7 +286,7 @@ export default function App() {
                       title="Click value to increase, click label below to toggle condition state"
                     >
                       <span className="text-[10px] font-black text-gray-500 uppercase tracking-tight block">{statName}</span>
-                      <span className="text-2xl font-black block my-1 text-white text-gradient bg-clip-text">{stat.val}</span>
+                      <span className="text-2xl font-black block my-1 text-white">{stat.val}</span>
                       
                       <button
                         type="button"
@@ -341,7 +371,7 @@ export default function App() {
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg space-y-4">
               <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 border-b border-gray-800 pb-1.5">🎲 Scalable Action Dice</h3>
               
-              {/* SPEED ROLLER WITH ADJ FIELDS */}
+              {/* Speed Roller Builder */}
               <div className="bg-gray-950 p-3 rounded-xl border border-gray-800 space-y-2">
                 <span className="text-[10px] font-bold text-gray-500 block uppercase">Speed Modifier Builder</span>
                 <div className="flex gap-1.5 items-center text-xs font-mono">
@@ -359,7 +389,7 @@ export default function App() {
                 </button>
               </div>
 
-              {/* ATTRITION ROLLER WITH ADJ FIELDS */}
+              {/* Attrition Roller Builder */}
               <div className="bg-gray-950 p-3 rounded-xl border border-gray-800 space-y-2">
                 <span className="text-[10px] font-bold text-gray-500 block uppercase">Attrition Builder</span>
                 <div className="flex gap-1.5 items-center text-xs font-mono">
@@ -378,7 +408,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* INTERACTIVE INVENTORY SYSTEM WITH CLICK-TO-ROLL CLASS DICE */}
+            {/* INVENTORY TRACKING LOGS WITH ASSOCIATED DICE CLASS SELECTIONS */}
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg space-y-3">
               <h3 className="text-xs font-black uppercase tracking-wider text-gray-400">🎒 Dynamic Equipment Locker (Click Dice to Roll)</h3>
               
@@ -420,15 +450,14 @@ export default function App() {
               </div>
             </div>
 
-            {/* IN-GAME SYSTEM SPECIAL RULES REFERENCE */}
+            {/* CLASS TRAIT MECHANICS CARD */}
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg space-y-2">
               <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 border-b border-gray-800 pb-1.5">🛡️ Active Archetype Blueprint</h3>
               <div className="text-[11px] text-gray-400 leading-relaxed space-y-2">
                 <div>
-                  <h4 className="font-bold text-emerald-400">Over Here!</h4>
-                  <p className="mt-0.5">Use an Action to roll <span className="text-white font-semibold">Vitality vs Vitality</span>. Targeted foe up to 18 sq moves adjacent to the Defender. Triggers Opportunity Attacks. On Critical, gain <span className="text-teal-400 font-bold">TAC</span> matching your Vitality score.</p>
+                  <h4 className="font-bold text-emerald-400">Class Signature Asset</h4>
+                  <p className="mt-0.5">Your primary class driver is configured to <span className="text-white font-semibold">{CLASS_DATA[classSelection].stat}</span> tracking rules. Status triggers are bound to active condition toggles.</p>
                 </div>
-                <p className="bg-gray-950 border border-gray-800 p-2 rounded-lg text-gray-500"><span className="text-amber-500 font-bold block text-[10px]">⚠️ LEVEL TRIGGER CRIT</span> On an unmodified roll of 1: Gain 1 asset TAC instantly.</p>
               </div>
             </div>
 
