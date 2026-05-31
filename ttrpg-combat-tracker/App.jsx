@@ -60,14 +60,14 @@ export default function App() {
     { label: 'AURA (- to AC)', val: 4 },
   ]);
 
-  // Comprehensive Status Effects Data Array (Verbatim Mapping from image_7b5eb5.png)
+  // Comprehensive Status Effects Data Array
   const [statusEffects, setStatusEffects] = useState([
-    { name: 'Panic', check: 'Might<4', effect: 'Advantage on next Attack against this target', color: 'bg-red-600 border-red-500 text-white', active: false, duration: 1 },
-    { name: 'Dazed', check: 'Agility<4', effect: 'Only one Action on turn', color: 'bg-yellow-500 border-yellow-400 text-gray-950', active: false, duration: 1 },
-    { name: 'Restrained', check: 'Vitality<4', effect: 'Cannot use Move Action', color: 'bg-amber-800 border-amber-700 text-amber-100', active: false, duration: 1 },
-    { name: 'Poisoned', check: 'Ingenuity<4', effect: 'Disadvantage on rolls', color: 'bg-green-700 border-green-600 text-green-100', active: false, duration: 1 },
+    { name: 'Panic', check: 'Might<4', effect: 'Advantage on next Attack against this target', color: 'bg-red-600/90 border-red-500 text-white', active: false, duration: 1 },
+    { name: 'Dazed', check: 'Agility<4', effect: 'Only one Action on turn', color: 'bg-amber-500 text-gray-950 font-bold border-amber-400', active: false, duration: 1 },
+    { name: 'Restrained', check: 'Vitality<4', effect: 'Cannot use Move Action', color: 'bg-orange-600 border-orange-500 text-white', active: false, duration: 1 },
+    { name: 'Poisoned', check: 'Ingenuity<4', effect: 'Disadvantage on rolls', color: 'bg-emerald-600 border-emerald-500 text-white', active: false, duration: 1 },
     { name: 'Frozen', check: 'Awareness<4', effect: 'Cannot use Attack Action', color: 'bg-blue-600 border-blue-500 text-white', active: false, duration: 1 },
-    { name: 'Purge', check: 'Spirit<4', effect: 'Remove all buffs from target, if they have no buffs lower AC by 2', color: 'bg-purple-700 border-purple-600 text-purple-100', active: false, duration: 1 },
+    { name: 'Purge', check: 'Spirit<4', effect: 'Remove all buffs from target, if they have no buffs lower AC by 2', color: 'bg-purple-600 border-purple-500 text-white', active: false, duration: 1 },
   ]);
 
   // On-Roll Attacks Manual Inputs Ledger
@@ -90,7 +90,7 @@ export default function App() {
 
   const [xp, setXp] = useState('120 / 300');
 
-  // Dynamic Rule Calculation Engine (Base + Temp AC + Leveling Modifiers)
+  // Dynamic Rule Calculation Engine
   const isPurgedActive = statusEffects.find(s => s.name === 'Purge')?.active;
   const computedTotalAc = baseAc + tempAc + totalAcMod;
   const finalCalculatedAc = isPurgedActive ? Math.max(0, computedTotalAc - 2) : computedTotalAc;
@@ -143,36 +143,36 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 p-3 md:p-6 font-sans selection:bg-emerald-500/20">
-      <div className="max-w-5xl mx-auto space-y-5">
+    <div className="min-h-screen bg-[#0b111e] text-slate-100 p-4 md:p-6 font-sans selection:bg-teal-500/20">
+      <div className="max-w-5xl mx-auto space-y-6">
         
         {/* ROW 1: PROFILE CORNER IDENTITY HEADER */}
-        <header className="bg-gray-900 border border-gray-800 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
+        <header className="bg-[#131a26] border border-slate-800 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
           <div className="space-y-1 w-full md:w-auto">
-            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Tactical Play Dashboard</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-teal-400">Tactical Play Dashboard</span>
             <div className="flex flex-wrap items-baseline gap-3">
               <input 
                 type="text" value={name} onChange={(e) => setName(e.target.value)}
                 placeholder="Enter Character Name..."
-                className="bg-transparent text-2xl font-black text-white focus:outline-none border-b border-transparent hover:border-gray-700 focus:border-emerald-500 transition pb-0.5 placeholder-gray-700 min-w-[240px]"
+                className="bg-transparent text-2xl font-black text-white focus:outline-none border-b border-transparent hover:border-slate-700 focus:border-teal-500 transition pb-0.5 placeholder-slate-700 min-w-[240px]"
               />
-              <div className="flex items-center gap-1.5 bg-gray-950 border border-gray-800 px-2 py-0.5 rounded-lg text-xs">
-                <span className="text-gray-500 font-bold">LVL</span>
+              <div className="flex items-center gap-1.5 bg-[#0b111e] border border-slate-800 px-2 py-0.5 rounded-lg text-xs">
+                <span className="text-slate-500 font-bold">LVL</span>
                 <input type="number" value={level} onChange={(e) => setLevel(Number(e.target.value))} className="w-8 bg-transparent font-black text-amber-400 text-center focus:outline-none" />
               </div>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-            <select value={classSelection} onChange={(e) => setClassSelection(e.target.value)} className="bg-gray-950 border border-gray-800 text-xs font-black rounded-xl p-2 text-emerald-400 focus:outline-none">
+            <select value={classSelection} onChange={(e) => setClassSelection(e.target.value)} className="bg-[#0b111e] border border-slate-800 text-xs font-black rounded-xl p-2 text-teal-400 focus:outline-none">
               {Object.keys(CLASS_DATA).map(cls => <option key={cls} value={cls}>{cls}</option>)}
             </select>
             
-            <select value={archetypeSelection} onChange={(e) => setArchetypeSelection(e.target.value)} className="bg-gray-950 border border-gray-800 text-xs font-black rounded-xl p-2 text-gray-300 focus:outline-none">
+            <select value={archetypeSelection} onChange={(e) => setArchetypeSelection(e.target.value)} className="bg-[#0b111e] border border-slate-800 text-xs font-black rounded-xl p-2 text-slate-300 focus:outline-none">
               {ARCHETYPES.map(arch => <option key={arch} value={arch}>{arch}</option>)}
             </select>
             
-            <div className="bg-rose-950/30 border border-rose-900/60 p-2 rounded-xl text-center min-w-[120px]">
+            <div className="bg-rose-950/20 border border-rose-900/40 p-2 rounded-xl text-center min-w-[120px]">
               <span className="text-[9px] font-bold uppercase tracking-wider text-rose-400 block">Weakness Grid</span>
               <span className="text-xs font-black text-rose-300">{CLASS_DATA[classSelection].weakness}</span>
             </div>
@@ -183,40 +183,40 @@ export default function App() {
         <section className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
           
           {/* Wounds Module */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Wounds</span>
-            <div className="flex items-center justify-between bg-gray-950 rounded-lg p-1 border border-gray-800 my-1">
-              <button type="button" onClick={() => setWounds(Math.max(0, wounds - 1))} className="text-xs font-black text-gray-500 hover:text-white px-1.5">-</button>
-              <input type="number" value={wounds} onChange={(e) => setWounds(Number(e.target.value))} className={`bg-transparent text-sm font-black text-center w-full focus:outline-none ${wounds > 0 ? 'text-red-400' : 'text-gray-300'}`} />
-              <button type="button" onClick={() => setWounds(wounds + 1)} className="text-xs font-black text-gray-500 hover:text-white px-1.5">+</button>
+          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Wounds</span>
+            <div className="flex items-center justify-between bg-[#0b111e] rounded-lg p-1 border border-slate-800 my-1">
+              <button type="button" onClick={() => setWounds(Math.max(0, wounds - 1))} className="text-xs font-black text-slate-500 hover:text-white px-1.5">-</button>
+              <input type="number" value={wounds} onChange={(e) => setWounds(Number(e.target.value))} className={`bg-transparent text-sm font-black text-center w-full focus:outline-none ${wounds > 0 ? 'text-red-400' : 'text-slate-300'}`} />
+              <button type="button" onClick={() => setWounds(wounds + 1)} className="text-xs font-black text-slate-500 hover:text-white px-1.5">+</button>
             </div>
-            <span className="text-[9px] text-gray-600 font-medium">Injuries</span>
+            <span className="text-[9px] text-slate-600 font-medium">Injuries</span>
           </div>
 
           {/* Max HP Stat Container */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Max HP</span>
-            <input type="number" value={maxHp} onChange={(e) => setMaxHp(Number(e.target.value))} className="bg-transparent text-xl font-black text-gray-300 text-center w-full focus:outline-none my-1" />
-            <span className="text-[9px] text-gray-600 font-medium">Ceiling Pool</span>
+          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Max HP</span>
+            <input type="number" value={maxHp} onChange={(e) => setMaxHp(Number(e.target.value))} className="bg-transparent text-xl font-black text-slate-300 text-center w-full focus:outline-none my-1" />
+            <span className="text-[9px] text-slate-600 font-medium">Ceiling Pool</span>
           </div>
 
           {/* Current HP Card */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Current HP</span>
-            <div className="flex items-center justify-between bg-gray-950 rounded-lg p-1 border border-gray-800 my-1">
+          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Current HP</span>
+            <div className="flex items-center justify-between bg-[#0b111e] rounded-lg p-1 border border-slate-800 my-1">
               <button type="button" onClick={() => setHp(Math.max(0, hp - 1))} className="text-xs font-black text-rose-500 hover:text-rose-400 px-1.5">-</button>
               <input type="number" value={hp} onChange={(e) => setHp(Number(e.target.value))} className="bg-transparent text-sm font-black text-center w-full focus:outline-none text-rose-400" />
               <button type="button" onClick={() => setHp(hp + 1)} className="text-xs font-black text-rose-500 hover:text-rose-400 px-1.5">+</button>
             </div>
-            <div className="w-full bg-gray-950 h-1 rounded-full overflow-hidden mt-0.5">
+            <div className="w-full bg-[#0b111e] h-1 rounded-full overflow-hidden mt-0.5">
               <div className="bg-rose-500 h-full transition-all duration-300" style={{ width: `${Math.min(100, Math.max(0, (hp / maxHp) * 100))}%` }}></div>
             </div>
           </div>
 
           {/* Temporary HP Card */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Temp HP</span>
-            <div className="flex items-center justify-between bg-gray-950 rounded-lg p-1 border border-gray-800 my-1">
+          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Temp HP</span>
+            <div className="flex items-center justify-between bg-[#0b111e] rounded-lg p-1 border border-slate-800 my-1">
               <button type="button" onClick={() => setThp(Math.max(0, thp - 1))} className="text-xs font-black text-sky-500 hover:text-sky-400 px-1.5">-</button>
               <input type="number" value={thp} onChange={(e) => setThp(Number(e.target.value))} className="bg-transparent text-sm font-black text-center w-full focus:outline-none text-sky-400" />
               <button type="button" onClick={() => setThp(thp + 1)} className="text-xs font-black text-sky-500 hover:text-sky-400 px-1.5">+</button>
@@ -225,18 +225,18 @@ export default function App() {
           </div>
 
           {/* ADAPTABLE CLASS RESOURCE / MP CURRENCY FIELD */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
+          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md">
             <input 
               type="text" value={resourceLabel} onChange={(e) => setResourceLabel(e.target.value)}
-              className="text-[10px] bg-transparent font-bold uppercase tracking-wider text-purple-400 text-center focus:outline-none border-b border-transparent hover:border-gray-800 focus:border-purple-600 w-full"
+              className="text-[10px] bg-transparent font-bold uppercase tracking-wider text-purple-400 text-center focus:outline-none border-b border-transparent hover:border-slate-800 focus:border-purple-600 w-full"
               placeholder="MP / Resource"
             />
-            <div className="flex items-center justify-between bg-gray-950 rounded-lg p-1 border border-gray-800 my-1">
+            <div className="flex items-center justify-between bg-[#0b111e] rounded-lg p-1 border border-slate-800 my-1">
               <button type="button" onClick={() => setCurrentResource(Math.max(0, currentResource - 1))} className="text-xs font-black text-purple-400 hover:text-purple-300 px-1">-</button>
               <div className="flex items-center justify-center font-mono text-xs font-black text-white w-full">
                 <span>{currentResource}</span>
-                <span className="text-gray-600 mx-0.5">/</span>
-                <input type="number" value={maxResource} onChange={(e) => setMaxResource(Number(e.target.value))} className="w-6 bg-transparent text-center text-gray-400 text-xs focus:outline-none font-bold" />
+                <span className="text-slate-600 mx-0.5">/</span>
+                <input type="number" value={maxResource} onChange={(e) => setMaxResource(Number(e.target.value))} className="w-6 bg-transparent text-center text-slate-400 text-xs focus:outline-none font-bold" />
               </div>
               <button type="button" onClick={() => setCurrentResource(Math.min(maxResource, currentResource + 1))} className="text-xs font-black text-purple-400 hover:text-purple-300 px-1">+</button>
             </div>
@@ -244,16 +244,16 @@ export default function App() {
           </div>
 
           {/* Base AC Card */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Base AC</span>
+          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Base AC</span>
             <input type="number" value={baseAc} onChange={(e) => setBaseAc(Number(e.target.value))} className="bg-transparent text-xl font-black text-blue-400 text-center w-full focus:outline-none my-1" />
-            <span className="text-[9px] text-gray-600 font-medium">Static Armor</span>
+            <span className="text-[9px] text-slate-600 font-medium">Static Armor</span>
           </div>
 
           {/* Temp AC Card */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Temp AC</span>
-            <div className="flex items-center justify-between bg-gray-950 rounded-lg p-1 border border-gray-800 my-1">
+          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Temp AC</span>
+            <div className="flex items-center justify-between bg-[#0b111e] rounded-lg p-1 border border-slate-800 my-1">
               <button type="button" onClick={() => setTempAc(Math.max(0, tempAc - 1))} className="text-xs font-black text-teal-500 hover:text-teal-400 px-1.5">-</button>
               <input type="number" value={tempAc} onChange={(e) => setTempAc(Number(e.target.value))} className="bg-transparent text-sm font-black text-center w-full focus:outline-none text-teal-400" />
               <button type="button" onClick={() => setTempAc(tempAc + 1)} className="text-xs font-black text-teal-500 hover:text-teal-400 px-1.5">+</button>
@@ -262,65 +262,75 @@ export default function App() {
           </div>
 
           {/* INTERACTIVE TOTAL AC OVERRIDE */}
-          <div className={`border rounded-xl p-3 text-center flex flex-col justify-between transition-all col-span-2 sm:col-span-1 ${isPurgedActive ? 'bg-red-950/40 border-red-500 animate-pulse' : 'bg-emerald-950/20 border-emerald-800'}`}>
-            <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 block">Total AC</span>
-            <div className="flex items-center justify-between bg-gray-950/80 rounded-lg p-1 border border-gray-800/80 my-1">
-              <button type="button" onClick={() => setTotalAcMod(totalAcMod - 1)} className="text-xs font-black text-gray-500 hover:text-white px-1.5" title="Lower total AC modifier">-</button>
+          <div className={`border rounded-xl p-3 text-center flex flex-col justify-between transition-all col-span-2 sm:col-span-1 shadow-md ${isPurgedActive ? 'bg-red-950/20 border-red-500 animate-pulse' : 'bg-emerald-950/10 border-emerald-800'}`}>
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Total AC</span>
+            <div className="flex items-center justify-between bg-[#0b111e]/80 rounded-lg p-1 border border-slate-800 my-1">
+              <button type="button" onClick={() => setTotalAcMod(totalAcMod - 1)} className="text-xs font-black text-slate-500 hover:text-white px-1.5">-</button>
               <span className={`text-base font-black ${isPurgedActive ? 'text-red-400' : 'text-emerald-400'}`}>{finalCalculatedAc}</span>
-              <button type="button" onClick={() => setTotalAcMod(totalAcMod + 1)} className="text-xs font-black text-gray-500 hover:text-white px-1.5" title="Raise total AC modifier">+</button>
+              <button type="button" onClick={() => setTotalAcMod(totalAcMod + 1)} className="text-xs font-black text-slate-500 hover:text-white px-1.5">+</button>
             </div>
-            <span className="text-[8px] font-bold tracking-tight block text-gray-500 uppercase">
-              {totalAcMod !== 0 ? `Level Mod: ${totalAcMod >= 0 ? '+' : ''}${totalAcMod}` : (isPurgedActive ? '⚠️ PURGED (-2)' : 'Live AC')}
+            <span className="text-[8px] font-bold tracking-tight block text-slate-500 uppercase">
+              {totalAcMod !== 0 ? `Mod: ${totalAcMod >= 0 ? '+' : ''}${totalAcMod}` : (isPurgedActive ? '⚠️ PURGED (-2)' : 'Live AC')}
             </span>
           </div>
 
         </section>
 
         {/* TERMINAL FEED MONITOR */}
-        <div className="bg-gray-950 border border-gray-800 px-4 py-3 rounded-xl flex justify-between items-center text-xs shadow-inner">
+        <div className="bg-[#0b111e] border border-slate-800 px-4 py-3 rounded-xl flex justify-between items-center text-xs shadow-inner">
           <div className="flex gap-2 items-center">
-            <span className="text-gray-500 font-bold uppercase tracking-wider">Console Terminal:</span>
+            <span className="text-slate-500 font-bold uppercase tracking-wider">Console Terminal:</span>
             <span className="font-mono text-emerald-400 font-bold">{diceLog}</span>
           </div>
           {diceLog !== 'Click a die or action to roll...' && (
-            <button onClick={() => setDiceLog('Click a die or action to roll...')} className="text-[10px] bg-gray-900 hover:bg-gray-800 text-gray-400 px-2 py-0.5 rounded transition">Reset Feed</button>
+            <button onClick={() => setDiceLog('Click a die or action to roll...')} className="text-[10px] bg-[#131a26] hover:bg-slate-800 text-slate-400 px-2 py-0.5 rounded transition">Reset Feed</button>
           )}
         </div>
 
         {/* ROW 3: INTERACTIVE OPERATIONS FRAMEWORK */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* MAIN INTERACTION BLOCK (LEFT/CENTER) */}
-          <div className="lg:col-span-2 space-y-5">
+          <div className="lg:col-span-2 space-y-6">
             
             {/* CORE STATS ARRAY */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg space-y-3">
-              <div className="flex justify-between items-center border-b border-gray-800 pb-2">
-                <h3 className="text-xs font-black uppercase tracking-wider text-gray-400">📊 Core Stats Array (0-5 Cap)</h3>
-                <span className="text-[9px] bg-gray-950 text-gray-500 px-2 py-0.5 rounded font-mono">Independent Arrays</span>
+            <div className="bg-[#131a26] border border-slate-800 rounded-2xl p-4 shadow-xl space-y-4">
+              <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                  <span>📊</span> Core Stats Array (0-5 Cap)
+                </h3>
+                <span className="text-[9px] bg-[#0b111e] text-slate-500 px-2 py-0.5 rounded font-mono">Independent Arrays</span>
               </div>
+              
               <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
                 {Object.keys(stats).map(statName => {
                   const stat = stats[statName];
                   const isMastered = stat.state === 'Mastered';
                   const isWeak = stat.state === 'Weak';
                   
-                  let themeStyles = 'border-gray-800 bg-gray-950';
-                  if (isMastered) themeStyles = 'border-emerald-900 bg-emerald-950/20';
-                  if (isWeak) themeStyles = 'border-amber-900/60 bg-amber-950/20';
+                  let borderTheme = 'border-slate-800 bg-[#0b111e]';
+                  let badgeTheme = 'text-slate-400 bg-slate-900';
+                  if (isMastered) {
+                    borderTheme = 'border-emerald-800/80 bg-[#0f2019]';
+                    badgeTheme = 'text-emerald-400 border border-emerald-800/60 bg-emerald-950/40';
+                  }
+                  if (isWeak) {
+                    borderTheme = 'border-amber-700/60 bg-[#241a12]';
+                    badgeTheme = 'text-amber-500 border border-amber-700/50 bg-amber-950/40';
+                  }
 
                   return (
-                    <div key={statName} className={`border rounded-xl p-2 text-center flex flex-col justify-between min-h-[110px] ${themeStyles}`}>
-                      <span className="text-[10px] font-black text-gray-500 uppercase tracking-tight block">{statName}</span>
+                    <div key={statName} className={`border rounded-xl p-2.5 text-center flex flex-col justify-between min-h-[120px] transition-all shadow-sm ${borderTheme}`}>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-wide block">{statName}</span>
                       
-                      <div className="flex items-center justify-between bg-gray-900/60 rounded-lg p-1 border border-gray-800/80 my-1 mx-auto w-full max-w-[70px]">
+                      <div className="flex items-center justify-between bg-[#0b111e]/80 rounded-lg p-1 border border-slate-800 my-1.5 mx-auto w-full">
                         <button 
                           type="button" 
                           onClick={() => setStats(prev => ({
                             ...prev, 
                             [statName]: { ...prev[statName], val: Math.max(0, prev[statName].val - 1) }
                           }))}
-                          className="text-xs font-black text-gray-500 hover:text-white px-1"
+                          className="text-xs font-black text-slate-500 hover:text-white px-1"
                         >-</button>
                         <span className="text-sm font-black text-white">{stat.val}</span>
                         <button 
@@ -329,7 +339,7 @@ export default function App() {
                             ...prev, 
                             [statName]: { ...prev[statName], val: Math.min(5, prev[statName].val + 1) }
                           }))}
-                          className="text-xs font-black text-gray-500 hover:text-white px-1"
+                          className="text-xs font-black text-slate-500 hover:text-white px-1"
                         >+</button>
                       </div>
                       
@@ -343,11 +353,9 @@ export default function App() {
                             [statName]: { ...prev[statName], state: states[nextIndex] }
                           }));
                         }}
-                        className={`text-[9px] font-bold uppercase tracking-tighter py-0.5 w-full rounded transition ${
-                          isMastered ? 'bg-emerald-900/40 text-emerald-400' : isWeak ? 'bg-amber-900/40 text-amber-500' : 'bg-gray-900 text-gray-400 hover:text-white'
-                        }`}
+                        className={`text-[9px] font-black uppercase tracking-wide py-1 w-full rounded-md transition-all ${badgeTheme}`}
                       >
-                        {isMastered ? '⭐ Mstr' : isWeak ? '⚠️ Weak' : 'Normal'}
+                        {isMastered ? '★ MSTR' : isWeak ? '⚠️ WEAK' : 'NORMAL'}
                       </button>
                     </div>
                   );
@@ -355,84 +363,82 @@ export default function App() {
               </div>
             </div>
 
-            {/* UNIFIED COMBAT HUD CORE */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-lg">
-              <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-gray-800">
+            {/* UNIFIED COMBAT HUD CORE (Perfect Match for image_7ae6b5.png) */}
+            <div className="bg-[#131a26] border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+              <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-850">
                 
                 {/* SUB-TABLE LEFT: COMBAT TURN ACTIONS */}
-                <div className="lg:col-span-5 p-4 space-y-3">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-emerald-400 border-b border-gray-800 pb-2">
-                    ⚡ Combat Turn Actions
+                <div className="lg:col-span-5 p-5 space-y-4">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-teal-400 flex items-center gap-2">
+                    <span>⚡</span> COMBAT TURN ACTIONS
                   </h3>
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     {actionRows.map((row, index) => (
-                      <div key={index} className="p-2 flex items-center gap-3 bg-gray-950/40 rounded-xl border border-gray-850/60 shadow-inner">
-                        <input 
-                          type="number" value={row.val} onChange={(e) => {
-                            const updated = [...actionRows];
-                            updated[index].val = Number(e.target.value);
-                            setActionRows(updated);
-                          }}
-                          className="w-12 bg-gray-950 border border-gray-800 rounded-lg py-1 text-center font-black text-sm text-emerald-400 focus:outline-none shrink-0"
-                        />
-                        <span className="text-xs font-bold text-gray-300">{row.label}</span>
+                      <div key={index} className="p-2.5 flex items-center gap-4 bg-[#161f30]/40 rounded-xl border border-slate-700/70 shadow-sm transition-all hover:border-slate-600">
+                        <div className="w-12 bg-[#0b111e] border border-slate-800 rounded-lg py-1 flex items-center justify-center shrink-0">
+                          <input 
+                            type="number" value={row.val} onChange={(e) => {
+                              const updated = [...actionRows];
+                              updated[index].val = Number(e.target.value);
+                              setActionRows(updated);
+                            }}
+                            className="w-full bg-transparent text-center font-black text-sm text-teal-400 focus:outline-none"
+                          />
+                        </div>
+                        <span className="text-xs font-bold text-slate-200 tracking-wide">{row.label}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* SUB-TABLE RIGHT: ACTIVE COMBAT STATUSES FROM REFERENCE */}
-                <div className="lg:col-span-7 p-4 space-y-3">
-                  <div className="flex justify-between items-center border-b border-gray-800 pb-2">
-                    <h3 className="text-xs font-black uppercase tracking-wider text-rose-400">
-                      ⚠️ Active Combat Conditions
+                {/* SUB-TABLE RIGHT: ACTIVE COMBAT STATUSES */}
+                <div className="lg:col-span-7 p-5 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-rose-400 flex items-center gap-2">
+                      <span>⚠️</span> ACTIVE COMBAT CONDITIONS
                     </h3>
-                    <span className="text-[9px] text-gray-500 font-mono">image_7b5eb5.png</span>
+                    <span className="text-[9px] text-slate-600 font-mono tracking-tight">image_7b5eb5.png</span>
                   </div>
                   
-                  <div className="space-y-2">
+                  <div className="divide-y divide-slate-800/60 border border-slate-800/80 rounded-xl overflow-hidden bg-[#0b111e]/30 px-3">
                     {statusEffects.map((effect, idx) => (
                       <div 
                         key={effect.name} 
-                        className={`p-2.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all ${
-                          effect.active 
-                            ? 'bg-gray-950 border-rose-900/80 shadow-md ring-1 ring-rose-900/20' 
-                            : 'bg-gray-900/20 border-gray-800/40 opacity-70'
+                        className={`py-3.5 flex items-center justify-between gap-3 transition-all ${
+                          effect.active ? 'opacity-100' : 'opacity-60'
                         }`}
                       >
-                        {/* Core Readability Set */}
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-sm md:text-base font-black text-white tracking-wide min-w-[80px]">{effect.name}</span>
-                            <span className={`text-[11px] font-mono font-black px-1.5 py-0.5 rounded border tracking-wide shadow-sm ${effect.color}`}>
-                              {effect.check}
-                            </span>
-                          </div>
-                          <p className="text-xs text-gray-300 font-medium leading-tight sm:pl-2 border-l-0 sm:border-l border-gray-800" title={effect.effect}>
-                            {effect.effect}
-                          </p>
+                        {/* Status Label & Checking Trigger */}
+                        <div className="flex items-center gap-3 shrink-0 w-36">
+                          <span className="text-sm font-black text-white tracking-wide">{effect.name}</span>
+                          <span className={`text-[10px] font-mono font-black px-1.5 py-0.5 rounded tracking-wide border ${effect.color}`}>
+                            {effect.check}
+                          </span>
                         </div>
 
-                        {/* Interactive Counter Steppers & Control Actions */}
-                        <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 border-t sm:border-t-0 border-gray-850 pt-2 sm:pt-0">
-                          {/* Multi-turn Manipulator Deck */}
-                          <div className="flex items-center bg-gray-950 border border-gray-800 rounded-lg p-0.5">
-                            <button type="button" onClick={() => handleDurationChange(idx, -1)} className="text-xs font-black text-gray-500 hover:text-white px-1">-</button>
+                        {/* Middle Modifier Mechanics text Description */}
+                        <p className="text-xs text-slate-400 font-medium leading-tight flex-1 pr-2">
+                          {effect.effect}
+                        </p>
+
+                        {/* Action Counters & Quick Toggles */}
+                        <div className="flex items-center gap-2.5 shrink-0">
+                          <div className="flex items-center bg-[#0b111e] border border-slate-800 rounded-lg p-0.5 shadow-inner">
+                            <button type="button" onClick={() => handleDurationChange(idx, -1)} className="text-[11px] font-black text-slate-500 hover:text-white px-1">-</button>
                             <span className="text-xs font-mono font-black text-amber-400 min-w-[14px] text-center">{effect.duration}t</span>
-                            <button type="button" onClick={() => handleDurationChange(idx, 1)} className="text-xs font-black text-gray-500 hover:text-white px-1">+</button>
+                            <button type="button" onClick={() => handleDurationChange(idx, 1)} className="text-[11px] font-black text-slate-500 hover:text-white px-1">+</button>
                           </div>
 
-                          {/* Instant Toggles */}
                           <button
                             type="button"
                             onClick={() => toggleStatusEffect(idx)}
-                            className={`text-[11px] font-black py-1 px-2.5 rounded-lg border w-22 text-center tracking-wide transition-all ${
+                            className={`text-[10px] font-black py-1 px-3 rounded-lg border tracking-wide transition-all ${
                               effect.active 
-                                ? 'bg-rose-950/60 text-rose-400 border-rose-500 shadow-inner' 
-                                : 'bg-gray-950 text-gray-500 border-gray-850 hover:text-gray-300'
+                                ? 'bg-rose-950/40 text-rose-400 border-rose-500/80 shadow-md' 
+                                : 'bg-[#131a26] text-slate-400 border-slate-700 hover:border-slate-500 hover:text-slate-200'
                             }`}
                           >
-                            {effect.active ? '🔴 ACTIVE' : 'Clear'}
+                            {effect.active ? 'ACTIVE' : 'Clear'}
                           </button>
                         </div>
 
@@ -445,12 +451,12 @@ export default function App() {
             </div>
 
             {/* ON-ROLL ATTACKS MANUAL LEDGER */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg space-y-3">
-              <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 border-b border-gray-800 pb-2">⚔️ Manual On-Roll Attack Trigger Matrix</h3>
+            <div className="bg-[#131a26] border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-2">⚔️ Manual On-Roll Attack Trigger Matrix</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[1, 3, 5, 7, 9, 11].map(num => (
-                  <div key={num} className="flex gap-2 items-center bg-gray-950 border border-gray-800/80 p-2 rounded-xl shadow-inner">
-                    <span className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs bg-gray-900 border border-gray-800 text-amber-500">
+                  <div key={num} className="flex gap-2 items-center bg-[#0b111e] border border-slate-800/80 p-2 rounded-xl shadow-inner">
+                    <span className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs bg-[#131a26] border border-slate-800 text-amber-500">
                       {num}
                     </span>
                     <input 
@@ -458,7 +464,7 @@ export default function App() {
                       value={onRollAttacks[num] || ''} 
                       onChange={(e) => setOnRollAttacks({ ...onRollAttacks, [num]: e.target.value })}
                       placeholder="Enter passive or trigger feature..."
-                      className="bg-transparent text-xs font-semibold text-gray-300 focus:outline-none flex-1 truncate placeholder-gray-700"
+                      className="bg-transparent text-xs font-semibold text-slate-300 focus:outline-none flex-1 truncate placeholder-slate-700"
                     />
                   </div>
                 ))}
@@ -468,61 +474,61 @@ export default function App() {
           </div>
 
           {/* SIDEBAR OPERATIONAL INFORMATION CONSOLE */}
-          <div className="space-y-5">
+          <div className="space-y-6">
             
             {/* MUTABLE DYNAMIC ROLLERS CONTAINER */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg space-y-4">
-              <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 border-b border-gray-800 pb-1.5">🎲 Scalable Action Dice</h3>
+            <div className="bg-[#131a26] border border-slate-800 rounded-2xl p-4 shadow-xl space-y-4">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-2">🎲 Scalable Action Dice</h3>
               
               {/* Speed Roller Builder */}
-              <div className="bg-gray-950 p-3 rounded-xl border border-gray-800 space-y-2">
-                <span className="text-[10px] font-bold text-gray-500 block uppercase">Speed Modifier Builder</span>
+              <div className="bg-[#0b111e] p-3 rounded-xl border border-slate-800 space-y-2">
+                <span className="text-[10px] font-bold text-slate-500 block uppercase tracking-wide">Speed Modifier Builder</span>
                 <div className="flex gap-1.5 items-center text-xs font-mono">
-                  <input type="number" value={spdDice.count} onChange={(e) => setSpdDice({ ...spdDice, count: Number(e.target.value) })} className="w-6 bg-gray-900 text-center text-emerald-400 font-bold border border-gray-800 rounded" />
+                  <input type="number" value={spdDice.count} onChange={(e) => setSpdDice({ ...spdDice, count: Number(e.target.value) })} className="w-6 bg-[#131a26] text-center text-teal-400 font-bold border border-slate-800 rounded" />
                   <span>d</span>
-                  <input type="number" value={spdDice.faces} onChange={(e) => setSpdDice({ ...spdDice, faces: Number(e.target.value) })} className="w-8 bg-gray-900 text-center text-emerald-400 font-bold border border-gray-800 rounded" />
+                  <input type="number" value={spdDice.faces} onChange={(e) => setSpdDice({ ...spdDice, faces: Number(e.target.value) })} className="w-8 bg-[#131a26] text-center text-teal-400 font-bold border border-slate-800 rounded" />
                   <span>+</span>
-                  <input type="number" value={spdDice.mod} onChange={(e) => setSpdDice({ ...spdDice, mod: Number(e.target.value) })} className="w-8 bg-gray-900 text-center text-emerald-400 font-bold border border-gray-800 rounded" />
+                  <input type="number" value={spdDice.mod} onChange={(e) => setSpdDice({ ...spdDice, mod: Number(e.target.value) })} className="w-8 bg-[#131a26] text-center text-teal-400 font-bold border border-slate-800 rounded" />
                 </div>
                 <button 
                   onClick={() => executeRoll(spdDice.count, spdDice.faces, spdDice.mod, 'Speed')}
-                  className="w-full mt-1 bg-teal-900/60 hover:bg-teal-800 text-teal-300 font-black text-xs py-2 rounded-lg transition border border-teal-700/50"
+                  className="w-full mt-1 bg-teal-950/40 hover:bg-teal-900/60 text-teal-300 font-black text-xs py-2 rounded-lg transition border border-teal-800/40"
                 >
                   Roll Speed Action 🏃‍♂️
                 </button>
               </div>
 
               {/* Attrition Roller Builder */}
-              <div className="bg-gray-950 p-3 rounded-xl border border-gray-800 space-y-2">
-                <span className="text-[10px] font-bold text-gray-500 block uppercase">Attrition Builder</span>
+              <div className="bg-[#0b111e] p-3 rounded-xl border border-slate-800 space-y-2">
+                <span className="text-[10px] font-bold text-slate-500 block uppercase tracking-wide">Attrition Builder</span>
                 <div className="flex gap-1.5 items-center text-xs font-mono">
-                  <input type="number" value={attritionDice.count} onChange={(e) => setAttritionDice({ ...attritionDice, count: Number(e.target.value) })} className="w-6 bg-gray-900 text-center text-amber-400 font-bold border border-gray-800 rounded" />
+                  <input type="number" value={attritionDice.count} onChange={(e) => setAttritionDice({ ...attritionDice, count: Number(e.target.value) })} className="w-6 bg-[#131a26] text-center text-amber-400 font-bold border border-slate-800 rounded" />
                   <span>d</span>
-                  <input type="number" value={attritionDice.faces} onChange={(e) => setAttritionDice({ ...attritionDice, faces: Number(e.target.value) })} className="w-8 bg-gray-900 text-center text-amber-400 font-bold border border-gray-800 rounded" />
+                  <input type="number" value={attritionDice.faces} onChange={(e) => setAttritionDice({ ...attritionDice, faces: Number(e.target.value) })} className="w-8 bg-[#131a26] text-center text-amber-400 font-bold border border-slate-800 rounded" />
                   <span>+</span>
-                  <input type="number" value={attritionDice.mod} onChange={(e) => setAttritionDice({ ...attritionDice, mod: Number(e.target.value) })} className="w-8 bg-gray-900 text-center text-amber-400 font-bold border border-gray-800 rounded" />
+                  <input type="number" value={attritionDice.mod} onChange={(e) => setAttritionDice({ ...attritionDice, mod: Number(e.target.value) })} className="w-8 bg-[#131a26] text-center text-amber-400 font-bold border border-slate-800 rounded" />
                 </div>
                 <button 
                   onClick={() => executeRoll(attritionDice.count, attritionDice.faces, attritionDice.mod, 'Attrition')}
-                  className="w-full mt-1 bg-amber-950/60 hover:bg-amber-900 text-amber-300 font-black text-xs py-2 rounded-lg transition border border-amber-800/50"
+                  className="w-full mt-1 bg-amber-950/40 hover:bg-amber-900/60 text-amber-300 font-black text-xs py-2 rounded-lg transition border border-amber-800/40"
                 >
                   Roll Attrition Modifier ⏳
                 </button>
               </div>
             </div>
 
-            {/* INVENTORY TRACKING LOGS WITH ASSOCIATED DICE CLASS SELECTIONS */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg space-y-3">
-              <h3 className="text-xs font-black uppercase tracking-wider text-gray-400">🎒 Dynamic Equipment Locker (Click Dice to Roll)</h3>
+            {/* INVENTORY TRACKING LOGS */}
+            <div className="bg-[#131a26] border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">🎒 Equipment Locker (Click Dice)</h3>
               
               <form onSubmit={handleAddItem} className="flex gap-1">
                 <input 
                   type="text" placeholder="Item Name..." value={newItemName} onChange={(e) => setNewItemName(e.target.value)}
-                  className="bg-gray-950 border border-gray-800 rounded-lg px-2 py-1 text-xs text-gray-200 focus:outline-none focus:border-emerald-500 flex-1"
+                  className="bg-[#0b111e] border border-slate-800 rounded-lg px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-teal-500 flex-1"
                 />
                 <select 
                   value={newItemDie} onChange={(e) => setNewItemDie(e.target.value)}
-                  className="bg-gray-950 border border-gray-800 text-xs rounded-lg px-1 text-amber-400 focus:outline-none"
+                  className="bg-[#0b111e] border border-slate-800 text-xs rounded-lg px-1 text-amber-400 focus:outline-none"
                 >
                   {['d4', 'd6', 'd8', 'd10', 'd12'].map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
@@ -531,20 +537,20 @@ export default function App() {
 
               <div className="space-y-1.5 max-h-52 overflow-y-auto pt-1">
                 {inventoryList.length === 0 ? (
-                  <p className="text-xs text-gray-600 italic py-3 text-center border border-dashed border-gray-800 rounded-xl">Locker empty.</p>
+                  <p className="text-xs text-slate-600 italic py-3 text-center border border-dashed border-slate-800 rounded-xl">Locker empty.</p>
                 ) : (
                   inventoryList.map(item => (
-                    <div key={item.id} className="flex justify-between items-center bg-gray-950 border border-gray-800 px-2.5 py-1.5 rounded-xl group">
-                      <span className="text-xs font-bold text-gray-300 truncate max-w-[130px]">{item.name}</span>
+                    <div key={item.id} className="flex justify-between items-center bg-[#0b111e] border border-slate-800 px-2.5 py-1.5 rounded-xl group">
+                      <span className="text-xs font-bold text-slate-300 truncate max-w-[130px]">{item.name}</span>
                       <div className="flex gap-2 items-center">
                         <button 
                           type="button" 
                           onClick={() => rollItemDie(item.name, item.die)}
-                          className="bg-blue-950 border border-blue-800 hover:border-blue-700 text-[10px] font-black uppercase text-blue-400 px-2 py-0.5 rounded shadow-sm tracking-wide transition active:scale-90"
+                          className="bg-blue-950/60 border border-blue-900 hover:border-blue-700 text-[10px] font-black uppercase text-blue-400 px-2 py-0.5 rounded shadow-sm tracking-wide transition active:scale-90"
                         >
                           🎲 {item.die}
                         </button>
-                        <button type="button" onClick={() => handleRemoveItem(item.id)} className="text-gray-600 hover:text-red-400 font-bold text-xs transition">✕</button>
+                        <button type="button" onClick={() => handleRemoveItem(item.id)} className="text-slate-600 hover:text-red-400 font-bold text-xs transition">✕</button>
                       </div>
                     </div>
                   ))
@@ -553,9 +559,9 @@ export default function App() {
             </div>
 
             {/* EXP AND PROGRESSION CELL */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg flex flex-col gap-1">
-              <label className="text-[10px] font-black uppercase tracking-wider text-gray-500">Session XP Progress</label>
-              <input type="text" value={xp} onChange={(e) => setXp(e.target.value)} className="bg-gray-950 border border-gray-800 rounded-xl px-3 py-1 font-mono text-xs font-bold text-amber-400 focus:outline-none w-full" />
+            <div className="bg-[#131a26] border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col gap-1">
+              <label className="text-[10px] font-black uppercase tracking-wider text-slate-500">Session XP Progress</label>
+              <input type="text" value={xp} onChange={(e) => setXp(e.target.value)} className="bg-[#0b111e] border border-slate-800 rounded-xl px-3 py-1 font-mono text-xs font-bold text-amber-400 focus:outline-none w-full" />
             </div>
 
           </div>
