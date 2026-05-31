@@ -1,0 +1,62 @@
+/* ── Google Font ──────────────────────────────────────────────────────────── */
+/* Crimson Pro is used as the display serif throughout the dashboard.         */
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap');
+
+/* ── Tailwind layers ─────────────────────────────────────────────────────── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base resets ─────────────────────────────────────────────────────────── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    /* Prevents layout shift caused by scrollbar appearance */
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    /* Matches the dashboard's root background so there's no flash of white */
+    background-color: #09090b; /* zinc-950 */
+    color: #f4f4f5;            /* zinc-100 */
+    font-family: 'Crimson Pro', Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Number inputs: hide the browser spin buttons for cleaner styling */
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+
+  /* Thin dark scrollbars on Webkit/Blink */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #18181b; /* zinc-900 */
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #3f3f46; /* zinc-700 */
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #52525b; /* zinc-600 */
+  }
+
+  /* Select elements: match dark theme, remove default arrow on Firefox */
+  select {
+    color-scheme: dark;
+  }
+}
