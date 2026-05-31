@@ -355,98 +355,92 @@ export default function App() {
               </div>
             </div>
 
-            {/* UNIFIED COMBAT ENGAGEMENT HUB (Combined layout with structural separator bar) */}
+            {/* UNIFIED COMBAT HUD CORE */}
             <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-lg">
-              
-              {/* Top Sub-Section Header: Actions */}
-              <div className="bg-gray-950 px-4 py-2.5 border-b border-gray-800">
-                <h3 className="text-xs font-black uppercase tracking-wider text-emerald-400">⚡ Combat Turn Actions & Multipliers</h3>
-              </div>
-              
-              {/* Actions Grid */}
-              <div className="divide-y divide-gray-800/60 p-2 space-y-1">
-                {actionRows.map((row, index) => (
-                  <div key={index} className="p-2 flex items-center justify-between gap-3 bg-gray-950/40 rounded-xl border border-gray-850">
-                    <div className="flex items-center gap-3">
-                      <input 
-                        type="number" value={row.val} onChange={(e) => {
-                          const updated = [...actionRows];
-                          updated[index].val = Number(e.target.value);
-                          setActionRows(updated);
-                        }}
-                        className="w-12 bg-gray-950 border border-gray-800 rounded-lg py-1 text-center font-black text-sm text-emerald-400 focus:outline-none"
-                      />
-                      <span className="text-xs font-bold text-gray-300">{row.label}</span>
-                    </div>
-                    <span className="text-[10px] font-mono text-gray-600 uppercase tracking-wider">Value Multiplier</span>
+              <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-gray-800">
+                
+                {/* SUB-TABLE LEFT: COMBAT TURN ACTIONS */}
+                <div className="lg:col-span-5 p-4 space-y-3">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-emerald-400 border-b border-gray-800 pb-2">
+                    ⚡ Combat Turn Actions
+                  </h3>
+                  <div className="space-y-2">
+                    {actionRows.map((row, index) => (
+                      <div key={index} className="p-2 flex items-center gap-3 bg-gray-950/40 rounded-xl border border-gray-850/60 shadow-inner">
+                        <input 
+                          type="number" value={row.val} onChange={(e) => {
+                            const updated = [...actionRows];
+                            updated[index].val = Number(e.target.value);
+                            setActionRows(updated);
+                          }}
+                          className="w-12 bg-gray-950 border border-gray-800 rounded-lg py-1 text-center font-black text-sm text-emerald-400 focus:outline-none shrink-0"
+                        />
+                        <span className="text-xs font-bold text-gray-300">{row.label}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
 
-              {/* HEAVY VISUAL SEPARATING BAR (UI/UX Anchor Point) */}
-              <div className="bg-gray-950 px-4 py-3 border-t-2 border-b border-gray-850 flex justify-between items-center mt-2">
-                <h3 className="text-xs font-black uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
-                  <span>⚠️ Active Combat Status Conditions</span>
-                </h3>
-                <span className="text-[9px] text-gray-500 font-mono tracking-tight">Reference Matrix: image_7b5eb5.png</span>
-              </div>
-
-              {/* Status Conditions Grid - ENHANCED READABILITY & LARGER FONTS */}
-              <div className="divide-y divide-gray-800/60 p-2 space-y-2">
-                {statusEffects.map((effect, idx) => (
-                  <div 
-                    key={effect.name} 
-                    className={`p-3.5 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all ${
-                      effect.active 
-                        ? 'bg-gray-950 border-rose-900/80 shadow-md ring-1 ring-rose-900/20' 
-                        : 'bg-gray-900/20 border-gray-800/40 opacity-70'
-                    }`}
-                  >
-                    {/* Status Label & Resistance Check Details */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
-                      <div className="flex items-center gap-2.5 shrink-0">
-                        {/* Enlarged Name font */}
-                        <span className="text-sm md:text-base font-black text-white tracking-wide min-w-[90px]">{effect.name}</span>
-                        {/* Enlarged Check font */}
-                        <span className={`text-xs font-mono font-black px-2 py-0.5 rounded border tracking-wide shadow-sm ${effect.color}`}>
-                          {effect.check}
-                        </span>
-                      </div>
-                      {/* Brighter, larger description typography to eliminate squinting */}
-                      <p className="text-sm text-gray-250 font-medium leading-relaxed pl-0 sm:pl-3 border-l-0 sm:border-l border-gray-800">
-                        {effect.effect}
-                      </p>
-                    </div>
-
-                    {/* Operational Trigger & Round Counter Layout */}
-                    <div className="flex items-center justify-between md:justify-end gap-4 border-t md:border-t-0 border-gray-850 pt-2.5 md:pt-0 shrink-0">
-                      
-                      {/* Active Duration Stepper Counter Deck */}
-                      <div className="flex flex-col items-center">
-                        <span className="text-[9px] uppercase tracking-wider text-gray-500 font-bold mb-0.5">Turns</span>
-                        <div className="flex items-center bg-gray-950 border border-gray-800 rounded-lg px-1.5 py-0.5">
-                          <button type="button" onClick={() => handleDurationChange(idx, -1)} className="text-xs font-black text-gray-400 hover:text-white px-1">-</button>
-                          <span className="text-sm font-mono font-black px-1.5 text-amber-400 min-w-[16px] text-center">{effect.duration}</span>
-                          <button type="button" onClick={() => handleDurationChange(idx, 1)} className="text-xs font-black text-gray-400 hover:text-white px-1">+</button>
-                        </div>
-                      </div>
-
-                      {/* Active State Toggle Button */}
-                      <button
-                        type="button"
-                        onClick={() => toggleStatusEffect(idx)}
-                        className={`text-xs font-black px-3 py-2 rounded-xl border w-28 text-center tracking-wide transition-all ${
+                {/* SUB-TABLE RIGHT: ACTIVE COMBAT STATUSES FROM REFERENCE */}
+                <div className="lg:col-span-7 p-4 space-y-3">
+                  <div className="flex justify-between items-center border-b border-gray-800 pb-2">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-rose-400">
+                      ⚠️ Active Combat Conditions
+                    </h3>
+                    <span className="text-[9px] text-gray-500 font-mono">image_7b5eb5.png</span>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {statusEffects.map((effect, idx) => (
+                      <div 
+                        key={effect.name} 
+                        className={`p-2.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all ${
                           effect.active 
-                            ? 'bg-rose-950/60 text-rose-400 border-rose-500 shadow-inner font-extrabold' 
-                            : 'bg-gray-950 text-gray-500 border-gray-850 hover:text-gray-300 hover:border-gray-700'
+                            ? 'bg-gray-950 border-rose-900/80 shadow-md ring-1 ring-rose-900/20' 
+                            : 'bg-gray-900/20 border-gray-800/40 opacity-70'
                         }`}
                       >
-                        {effect.active ? '🔴 AFFLICTED' : 'Clear'}
-                      </button>
-                    </div>
+                        {/* Core Readability Set */}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-sm md:text-base font-black text-white tracking-wide min-w-[80px]">{effect.name}</span>
+                            <span className={`text-[11px] font-mono font-black px-1.5 py-0.5 rounded border tracking-wide shadow-sm ${effect.color}`}>
+                              {effect.check}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-300 font-medium leading-tight sm:pl-2 border-l-0 sm:border-l border-gray-800" title={effect.effect}>
+                            {effect.effect}
+                          </p>
+                        </div>
 
+                        {/* Interactive Counter Steppers & Control Actions */}
+                        <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 border-t sm:border-t-0 border-gray-850 pt-2 sm:pt-0">
+                          {/* Multi-turn Manipulator Deck */}
+                          <div className="flex items-center bg-gray-950 border border-gray-800 rounded-lg p-0.5">
+                            <button type="button" onClick={() => handleDurationChange(idx, -1)} className="text-xs font-black text-gray-500 hover:text-white px-1">-</button>
+                            <span className="text-xs font-mono font-black text-amber-400 min-w-[14px] text-center">{effect.duration}t</span>
+                            <button type="button" onClick={() => handleDurationChange(idx, 1)} className="text-xs font-black text-gray-500 hover:text-white px-1">+</button>
+                          </div>
+
+                          {/* Instant Toggles */}
+                          <button
+                            type="button"
+                            onClick={() => toggleStatusEffect(idx)}
+                            className={`text-[11px] font-black py-1 px-2.5 rounded-lg border w-22 text-center tracking-wide transition-all ${
+                              effect.active 
+                                ? 'bg-rose-950/60 text-rose-400 border-rose-500 shadow-inner' 
+                                : 'bg-gray-950 text-gray-500 border-gray-850 hover:text-gray-300'
+                            }`}
+                          >
+                            {effect.active ? '🔴 ACTIVE' : 'Clear'}
+                          </button>
+                        </div>
+
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+
               </div>
             </div>
 
