@@ -363,12 +363,12 @@ export default function App() {
               </div>
             </div>
 
-            {/* UNIFIED COMBAT HUD CORE (Perfect Match for image_7ae6b5.png) */}
+            {/* UNIFIED COMBAT HUD CORE */}
             <div className="bg-[#131a26] border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
               <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-850">
                 
                 {/* SUB-TABLE LEFT: COMBAT TURN ACTIONS */}
-                <div className="lg:col-span-5 p-5 space-y-4">
+                <div className="lg:col-span-4 p-5 space-y-4">
                   <h3 className="text-xs font-black uppercase tracking-wider text-teal-400 flex items-center gap-2">
                     <span>⚡</span> COMBAT TURN ACTIONS
                   </h3>
@@ -391,38 +391,33 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* SUB-TABLE RIGHT: ACTIVE COMBAT STATUSES */}
-                <div className="lg:col-span-7 p-5 space-y-4">
+                {/* SUB-TABLE RIGHT: ACTIVE COMBAT STATUSES (Perfect Grid Realignment based on image_7a9083.png) */}
+                <div className="lg:col-span-8 p-5 space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-xs font-black uppercase tracking-wider text-rose-400 flex items-center gap-2">
                       <span>⚠️</span> ACTIVE COMBAT CONDITIONS
                     </h3>
-                    <span className="text-[9px] text-slate-600 font-mono tracking-tight">image_7b5eb5.png</span>
+                    <span className="text-[9px] text-slate-600 font-mono tracking-tight">image_7a9083.png</span>
                   </div>
                   
-                  <div className="divide-y divide-slate-800/60 border border-slate-800/80 rounded-xl overflow-hidden bg-[#0b111e]/30 px-3">
+                  <div className="divide-y divide-slate-800/60 border border-slate-800/80 rounded-xl overflow-hidden bg-[#0b111e]/30 px-4">
                     {statusEffects.map((effect, idx) => (
                       <div 
                         key={effect.name} 
-                        className={`py-3.5 flex items-center justify-between gap-3 transition-all ${
+                        className={`py-3.5 grid grid-cols-12 items-center gap-2 transition-all ${
                           effect.active ? 'opacity-100' : 'opacity-60'
                         }`}
                       >
-                        {/* Status Label & Checking Trigger */}
-                        <div className="flex items-center gap-3 shrink-0 w-36">
+                        {/* 1. LEFT COLUMN: Stacked Name + Requirement Condition Block */}
+                        <div className="col-span-3 flex flex-col items-start gap-1 shrink-0">
                           <span className="text-sm font-black text-white tracking-wide">{effect.name}</span>
-                          <span className={`text-[10px] font-mono font-black px-1.5 py-0.5 rounded tracking-wide border ${effect.color}`}>
+                          <span className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded tracking-wide border ${effect.color}`}>
                             {effect.check}
                           </span>
                         </div>
 
-                        {/* Middle Modifier Mechanics text Description */}
-                        <p className="text-xs text-slate-400 font-medium leading-tight flex-1 pr-2">
-                          {effect.effect}
-                        </p>
-
-                        {/* Action Counters & Quick Toggles */}
-                        <div className="flex items-center gap-2.5 shrink-0">
+                        {/* 2. CENTER COLUMN: Unified Interaction Counters deck */}
+                        <div className="col-span-4 flex items-center justify-center gap-2">
                           <div className="flex items-center bg-[#0b111e] border border-slate-800 rounded-lg p-0.5 shadow-inner">
                             <button type="button" onClick={() => handleDurationChange(idx, -1)} className="text-[11px] font-black text-slate-500 hover:text-white px-1">-</button>
                             <span className="text-xs font-mono font-black text-amber-400 min-w-[14px] text-center">{effect.duration}t</span>
@@ -432,7 +427,7 @@ export default function App() {
                           <button
                             type="button"
                             onClick={() => toggleStatusEffect(idx)}
-                            className={`text-[10px] font-black py-1 px-3 rounded-lg border tracking-wide transition-all ${
+                            className={`text-[10px] font-black py-1 px-2.5 rounded-lg border tracking-wide transition-all ${
                               effect.active 
                                 ? 'bg-rose-950/40 text-rose-400 border-rose-500/80 shadow-md' 
                                 : 'bg-[#131a26] text-slate-400 border-slate-700 hover:border-slate-500 hover:text-slate-200'
@@ -440,6 +435,13 @@ export default function App() {
                           >
                             {effect.active ? 'ACTIVE' : 'Clear'}
                           </button>
+                        </div>
+
+                        {/* 3. RIGHT COLUMN: Complete Text Right Justified */}
+                        <div className="col-span-5 text-right pl-2">
+                          <p className="text-xs text-slate-400 font-medium leading-tight inline-block text-right">
+                            {effect.effect}
+                          </p>
                         </div>
 
                       </div>
