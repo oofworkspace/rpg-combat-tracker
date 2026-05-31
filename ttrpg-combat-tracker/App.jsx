@@ -9,6 +9,16 @@ const CLASS_DATA = {
   Mancer: { stat: 'Spirit', weakness: 'Fire / Purged', minor: 'Resist', color: 'border-blue-600 bg-blue-950/30 text-blue-400' },
 };
 
+// Dynamic mapping configuration for automatic status distribution
+const CLASS_STAT_MAPPING = {
+  Adept: { strong: 'Agility', weak: 'Vitality' },
+  Creator: { strong: 'Ingenuity', weak: 'Spirit' },
+  Defender: { strong: 'Vitality', weak: 'Agility' },
+  Mancer: { strong: 'Spirit', weak: 'Ingenuity' },
+  Mender: { strong: 'Awareness', weak: 'Might' },
+  Warrior: { strong: 'Might', weak: 'Awareness' },
+};
+
 const ARCHETYPES = ['Entertainer', 'Hero', 'Inventor', 'Outlaw', 'Scholar', 'Survivor'];
 
 export default function App() {
@@ -40,11 +50,11 @@ export default function App() {
   // Virtual Dice Log State
   const [diceLog, setDiceLog] = useState('Click a die or action to roll...');
 
-  // Attribute Node States (Clamped cleanly 0-5)
+  // Attribute Node States (Clamped cleanly 0-5) - Default set to match Adept profiles safely
   const [stats, setStats] = useState({
     Might: { val: 1, state: 'Normal' },
-    Agility: { val: 1, state: 'Weak' },
-    Vitality: { val: 1, state: 'Mastered' },
+    Agility: { val: 1, state: 'Mastered' }, // Strong for Adept
+    Vitality: { val: 1, state: 'Weak' },     // Weak for Adept
     Ingenuity: { val: 1, state: 'Normal' },
     Awareness: { val: 2, state: 'Normal' },
     Spirit: { val: 1, state: 'Normal' },
@@ -95,6 +105,32 @@ export default function App() {
   const isPurgedActive = statusEffects.find(s => s.name === 'Purge')?.active;
   const computedTotalAc = baseAc + tempAc;
   const finalCalculatedAc = isPurgedActive ? Math.max(0, computedTotalAc - 2) : computedTotalAc;
+
+  // Class Selection Swapper Logic (Preserves manual text input values safely)
+  const handleClassSelectionChange = (newClass) => {
+    setClassSelection(newClass);
+    
+    const rules = CLASS_STAT_MAPPING[newClass];
+    if (!rules) return;
+
+    setStats(prevStats => {
+      const freshlyMappedStats = {};
+      
+      // Step 1: Default everything back to normal while mapping accurate values safely
+      Object.keys(prevStats).forEach(statKey => {
+        freshlyMappedStats[statKey] = {
+          ...prevStats[statKey],
+          state: 'Normal'
+        };
+      });
+
+      // Step 2: Inject state profiles assigned by class layout definitions
+      if (freshlyMappedStats[rules.strong]) freshlyMappedStats[rules.strong].state = 'Mastered';
+      if (freshlyMappedStats[rules.weak]) freshlyMappedStats[rules.weak].state = 'Weak';
+
+      return freshlyMappedStats;
+    });
+  };
 
   // Programmable Dice Roller
   const executeRoll = (count, faces, mod, labelText) => {
@@ -165,7 +201,11 @@ export default function App() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-            <select value={classSelection} onChange={(e) => setClassSelection(e.target.value)} className="bg-[#0b111e] border border-slate-800 text-xs font-black rounded-xl p-2 text-teal-400 focus:outline-none">
+            <select 
+              value={classSelection} 
+              onChange={(e) => handleClassSelectionChange(e.target.value)} 
+              className="bg-[#0b111e] border border-slate-800 text-xs font-black rounded-xl p-2 text-teal-400 focus:outline-none"
+            >
               {Object.keys(CLASS_DATA).map(cls => <option key={cls} value={cls}>{cls}</option>)}
             </select>
             
@@ -251,7 +291,6 @@ export default function App() {
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block text-left">Armor Class Profile</span>
             
             <div className="flex items-center justify-between gap-3 my-1">
-              {/* Bold Current AC Calculated HUD */}
               <div className="flex flex-col items-center justify-center bg-[#0b111e]/90 border border-slate-800 rounded-xl p-1.5 min-w-[70px] h-12 shrink-0 shadow-inner">
                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tight">Current AC</span>
                 <span className={`text-xl font-black leading-none ${isPurgedActive ? 'text-red-400 animate-pulse' : 'text-teal-400'}`}>
@@ -259,9 +298,7 @@ export default function App() {
                 </span>
               </div>
 
-              {/* Precise Dual Control Terminal */}
               <div className="grid grid-cols-2 gap-2 w-full">
-                {/* Manual Base AC Input for Leveling */}
                 <div className="bg-[#0b111e]/60 border border-slate-800 p-1 rounded-lg text-center flex flex-col justify-between h-12">
                   <span className="text-[8px] font-bold text-slate-500 block uppercase">Base AC</span>
                   <input 
@@ -272,7 +309,6 @@ export default function App() {
                   />
                 </div>
                 
-                {/* Temp AC + / - Incrementor */}
                 <div className="bg-[#0b111e]/60 border border-slate-800 p-1 rounded-lg text-center flex flex-col justify-between h-12">
                   <span className="text-[8px] font-bold text-slate-500 block uppercase">Temp AC</span>
                   <div className="flex items-center justify-between w-full px-1">
@@ -428,7 +464,6 @@ export default function App() {
                           effect.active ? 'opacity-100' : 'opacity-60'
                         }`}
                       >
-                        {/* 1. LEFT COLUMN: Stacked Name + Requirement Condition Block */}
                         <div className="col-span-3 flex flex-col items-start gap-1 shrink-0">
                           <span className="text-sm font-black text-white tracking-wide">{effect.name}</span>
                           <span className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded tracking-wide border ${effect.color}`}>
@@ -436,7 +471,6 @@ export default function App() {
                           </span>
                         </div>
 
-                        {/* 2. CENTER COLUMN: Unified Interaction Counters deck */}
                         <div className="col-span-4 flex items-center justify-center gap-2">
                           <div className="flex items-center bg-[#0b111e] border border-slate-800 rounded-lg p-0.5 shadow-inner">
                             <button type="button" onClick={() => handleDurationChange(idx, -1)} className="text-[11px] font-black text-slate-500 hover:text-white px-1">-</button>
@@ -457,7 +491,6 @@ export default function App() {
                           </button>
                         </div>
 
-                        {/* 3. RIGHT COLUMN: Complete Text Right Justified */}
                         <div className="col-span-5 text-right pl-2">
                           <p className="text-xs text-slate-400 font-medium leading-tight inline-block text-right">
                             {effect.effect}
@@ -502,7 +535,6 @@ export default function App() {
             <div className="bg-[#131a26] border border-slate-800 rounded-2xl p-4 shadow-xl space-y-4">
               <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-2">🎲 Scalable Action Dice</h3>
               
-              {/* Speed Roller Builder */}
               <div className="bg-[#0b111e] p-3 rounded-xl border border-slate-800 space-y-2">
                 <span className="text-[10px] font-bold text-slate-500 block uppercase tracking-wide">Speed Modifier Builder</span>
                 <div className="flex gap-1.5 items-center text-xs font-mono">
@@ -520,7 +552,6 @@ export default function App() {
                 </button>
               </div>
 
-              {/* Attrition Roller Builder */}
               <div className="bg-[#0b111e] p-3 rounded-xl border border-slate-800 space-y-2">
                 <span className="text-[10px] font-bold text-slate-500 block uppercase tracking-wide">Attrition Builder</span>
                 <div className="flex gap-1.5 items-center text-xs font-mono">
