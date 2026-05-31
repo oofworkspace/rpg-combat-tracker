@@ -24,8 +24,8 @@ export default function App() {
   const [hp, setHp] = useState(24);
   const [thp, setThp] = useState(0);
   
-  // Streamlined Armor Class States
-  const [baseAc, setBaseAc] = useState(12);
+  // Streamlined Armor Class States (Defaulted to 0)
+  const [baseAc, setBaseAc] = useState(0);
   const [tempAc, setTempAc] = useState(0);
 
   // Class Currency / Adaptable MP Asset Engine (Higher Thresholds)
