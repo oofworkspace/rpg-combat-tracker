@@ -1,276 +1,348 @@
 import { useState } from 'react';
 
-// Exact data mapping from the Google Doc (image_7c431e.png)
-const CLASS_AFFINITIES = {
-  Warrior: { stat: 'Might', dmgType: 'Shadow', status: 'Panicked', minor: 'Cleave', weakness: 'Light', color: 'border-purple-600 bg-purple-950/30 text-purple-400', badge: 'bg-purple-900/50 text-purple-300 border-purple-700' },
-  Adept: { stat: 'Agility', dmgType: 'Sand', status: 'Dazed', minor: 'Move', weakness: 'Wind', color: 'border-amber-600 bg-amber-950/30 text-amber-400', badge: 'bg-amber-900/50 text-amber-300 border-amber-700' },
-  Defender: { stat: 'Vitality', dmgType: 'Wind', status: 'Restrained', minor: 'Defend', weakness: 'Sand', color: 'border-slate-500 bg-slate-900/40 text-slate-300', badge: 'bg-slate-800 text-slate-300 border-slate-600' },
-  Creator: { stat: 'Ingenuity', dmgType: 'Fire', status: 'Ignite', minor: 'Steady', weakness: 'Water', color: 'border-red-600 bg-red-950/30 text-red-400', badge: 'bg-red-900/50 text-red-300 border-red-700' },
-  Mender: { stat: 'Awareness', dmgType: 'Light', status: 'Blind', minor: 'Take Cover', weakness: 'Shadow', color: 'border-yellow-500 bg-yellow-950/30 text-yellow-400', badge: 'bg-yellow-900/50 text-yellow-200 border-yellow-600' },
-  Mancer: { stat: 'Spirit', dmgType: 'Water', status: 'Purged', minor: 'Resist', weakness: 'Fire', color: 'border-blue-600 bg-blue-950/30 text-blue-400', badge: 'bg-blue-900/50 text-blue-300 border-blue-700' },
-};
-
-const STATUS_EFFECTS = {
-  Panicked: 'Advantage on Attacks against this target.',
-  Dazed: 'Only one Action on turn.',
-  Restrained: 'Cannot use Minor Actions.',
-  Ignite: 'Disadvantage on rolls.',
-  Blind: 'Cannot use Attack Action.',
-  Purged: 'Remove all buffs from the target, if they have no buffs half their AC (ru).',
+// Class layouts from your original affinity systems
+const CLASS_DATA = {
+  Defender: { stat: 'Vitality', weakness: 'Sand / Daze', minor: 'Defend', color: 'border-slate-600 bg-slate-900/40 text-slate-300' },
+  Warrior: { stat: 'Might', weakness: 'Light / Panic', minor: 'Cleave', color: 'border-purple-600 bg-purple-950/30 text-purple-400' },
+  Adept: { stat: 'Agility', weakness: 'Wind / Daze', minor: 'Move', color: 'border-amber-600 bg-amber-950/30 text-amber-400' },
+  Creator: { stat: 'Ingenuity', weakness: 'Water / Ignite', minor: 'Steady', color: 'border-red-600 bg-red-950/30 text-red-400' },
+  Mender: { stat: 'Awareness', weakness: 'Shadow / Blind', minor: 'Take Cover', color: 'border-yellow-500 bg-yellow-950/30 text-yellow-400' },
+  Mancer: { stat: 'Spirit', weakness: 'Fire / Purged', minor: 'Resist', color: 'border-blue-600 bg-blue-950/30 text-blue-400' },
 };
 
 export default function App() {
-  // Character State
-  const [charName, setCharName] = useState('My Hero');
-  const [selectedClass, setSelectedClass] = useState('Warrior');
-  const [hp, setHp] = useState(45);
-  const [maxHp, setMaxHp] = useState(45);
-  const [baseAc, setBaseAc] = useState(16);
+  // Identity Block
+  const [name, setName] = useState('Argylle (Ryan)');
+  const [level, setLevel] = useState(2);
+  const [archetype, setArchetype] = useState('Defender');
+  const [subClass, setSubClass] = useState('Survivor');
+
+  // Vitals State Matrix
+  const [wounds, setWounds] = useState(0);
+  const [maxHp, setMaxHp] = useState(24);
+  const [hp, setHp] = useState(24);
+  const [thp, setThp] = useState(0);
+  const [baseAc, setBaseAc] = useState(2);
+  const [tac, setTac] = useState(0);
   
-  // Interactive Toggles
-  const [activeStatuses, setActiveStatuses] = useState({
-    Panicked: false, Dazed: false, Restrained: false, Ignite: false, Blind: false, Purged: false
+  // Virtual Dice Log State
+  const [diceLog, setDiceLog] = useState('Click a die to roll...');
+
+  // Attribute Node States
+  const [stats, setStats] = useState({
+    Might: { val: 1, state: 'Normal' },
+    Agility: { val: 1, state: 'Weak' },
+    Vitality: { val: 1, state: 'Mastered' },
+    Ingenuity: { val: 1, state: 'Normal' },
+    Awareness: { val: 2, state: 'Normal' },
+    Spirit: { val: 1, state: 'Normal' },
+    Charisma: { val: 2, state: 'Normal' },
   });
-  const [buffsList, setBuffsList] = useState(['Shield of Faith']);
-  const [newBuffName, setNewBuffName] = useState('');
 
-  const currentAffinity = CLASS_AFFINITIES[selectedClass];
+  // Action Grid Console Row Data
+  const [actionRows, setActionRows] = useState([
+    { label: 'Attack Bonus', val: 0, status: 'Ignite', badgeColor: 'bg-red-900 text-red-200 border-red-700', active: false },
+    { label: 'TAKE COVER (AC range)', val: 0, status: 'Panic', badgeColor: 'bg-purple-900 text-purple-200 border-purple-700', active: false },
+    { label: 'DEFEND (AC melee)', val: 0, status: 'Purge', badgeColor: 'bg-blue-900 text-blue-200 border-blue-700', active: false },
+    { label: 'STEADY (DMG Range)', val: 0, status: 'Restrain', badgeColor: 'bg-sky-900 text-sky-200 border-sky-700', active: false },
+    { label: 'CLEAVE (attacked next melee)', val: 0, status: 'Daze', badgeColor: 'bg-amber-900 text-amber-200 border-amber-800', active: false },
+    { label: 'AURA (- to AC)', val: 4, status: 'Blind', badgeColor: 'bg-yellow-900 text-yellow-100 border-yellow-600', active: false },
+  ]);
 
-  // Logic: Calculate dynamic AC based on Purged status and buff conditions
-  const hasBuffs = buffsList.length > 0;
-  const isPurged = activeStatuses.Purged;
-  const finalAc = (isPurged && !hasBuffs) ? Math.floor(baseAc / 2) : baseAc;
+  // Inventory & Bookkeeping Blocks
+  const [xp, setXp] = useState('120 / 300');
+  const [inventory, setInventory] = useState('Iron Kite Shield, Heavy Plated Mail, Healing Draught (x2)');
 
-  const toggleStatus = (statusName) => {
-    setActiveStatuses(prev => {
-      const updated = { ...prev, [statusName]: !prev[statusName] };
-      // Rule mechanic: Purged clears all buffs immediately when activated
-      if (statusName === 'Purged' && updated.Purged) {
-        setBuffsList([]);
-      }
-      return updated;
+  // Dynamic Rule Calculation Engine
+  const isPurgedActive = actionRows.find(r => r.status === 'Purge')?.active;
+  const computedTotalAc = baseAc + tac;
+  const finalCalculatedAc = isPurgedActive ? Math.floor(computedTotalAc / 2) : computedTotalAc;
+
+  // Dice Roller Execution Tool
+  const rollDice = (type, formulaText) => {
+    let roll = 0;
+    if (type === 'spd') {
+      roll = Math.floor(Math.random() * 4) + 1 + 5; // 1d4 + 5
+    } else if (type === 'attrition') {
+      roll = Math.floor(Math.random() * 4) + 1; // 1d4
+    }
+    setDiceLog(`🎲 Rolled ${formulaText}: Result = [ ${roll} ]`);
+  };
+
+  const toggleStatState = (statName, current) => {
+    const states = ['Normal', 'Weak', 'Mastered'];
+    const nextIndex = (states.indexOf(current) + 1) % states.length;
+    setStats({
+      ...stats,
+      [statName]: { ...stats[statName], state: states[nextIndex] }
     });
   };
 
-  const addBuff = (e) => {
-    e.preventDefault();
-    if (!newBuffName.trim()) return;
-    setBuffsList([...buffsList, newBuffName.trim()]);
-    setNewBuffName('');
+  const toggleRowActive = (index) => {
+    const updated = [...actionRows];
+    updated[index].active = !updated[index].active;
+    setActionRows(updated);
   };
 
-  const removeBuff = (index) => {
-    setBuffsList(buffsList.filter((_, i) => i !== index));
+  const updateRowVal = (index, newVal) => {
+    const updated = [...actionRows];
+    updated[index].val = Number(newVal);
+    setActionRows(updated);
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 p-4 md:p-8 font-sans selection:bg-emerald-500/30">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-950 text-gray-100 p-3 md:p-6 font-sans selection:bg-emerald-500/20">
+      <div className="max-w-5xl mx-auto space-y-5">
         
-        {/* TOP INTERACTIVE EDIT BAR */}
-        <section className="bg-gray-900 border border-gray-800 p-4 rounded-2xl flex flex-col sm:flex-row gap-4 justify-between items-center shadow-xl">
-          <div className="w-full sm:w-auto flex flex-col gap-1">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Character Name</label>
-            <input 
-              type="text" value={charName} onChange={(e) => setCharName(e.target.value)}
-              className="bg-gray-950 border border-gray-700 rounded-xl px-3 py-1.5 font-bold text-lg text-emerald-400 focus:outline-none focus:border-emerald-500 w-full sm:w-64"
-            />
+        {/* ROW 1: CORE CHARACTER IDENTITY HEADER */}
+        <header className="bg-gray-900 border border-gray-800 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
+          <div className="space-y-1 w-full md:w-auto">
+            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Tactical Sheet Interface</span>
+            <div className="flex flex-wrap items-baseline gap-3">
+              <input 
+                type="text" value={name} onChange={(e) => setName(e.target.value)}
+                className="bg-transparent text-2xl font-black text-white focus:outline-none border-b border-transparent hover:border-gray-700 focus:border-emerald-500 transition pb-0.5"
+              />
+              <div className="flex items-center gap-1.5 bg-gray-950 border border-gray-800 px-2 py-0.5 rounded-lg text-xs">
+                <span className="text-gray-500 font-bold">LVL</span>
+                <input type="number" value={level} onChange={(e) => setLevel(Number(e.target.value))} className="w-6 bg-transparent font-black text-amber-400 text-center focus:outline-none" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 font-medium">System Core Profile Tracking Terminal</p>
           </div>
 
-          <div className="w-full sm:w-auto flex flex-col gap-1">
-            <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Select Archetype / Class</label>
-            <select 
-              value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}
-              className="bg-gray-950 border border-gray-700 rounded-xl px-3 py-2 font-bold text-gray-200 focus:outline-none focus:border-emerald-500 w-full sm:w-52"
-            >
-              {Object.keys(CLASS_AFFINITIES).map(cls => (
-                <option key={cls} value={cls}>{cls}</option>
-              ))}
+          {/* Archetype Selections */}
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            <select value={archetype} onChange={(e) => setArchetype(e.target.value)} className="bg-gray-950 border border-gray-800 text-xs font-black rounded-xl p-2 text-emerald-400 focus:outline-none focus:border-emerald-500">
+              {Object.keys(CLASS_DATA).map(cls => <option key={cls} value={cls}>{cls}</option>)}
             </select>
+            <input type="text" value={subClass} onChange={(e) => setSubClass(e.target.value)} className="bg-gray-950 border border-gray-800 text-xs font-bold rounded-xl p-2 text-gray-300 w-28 text-center focus:outline-none focus:border-emerald-500" placeholder="Role Specialization" />
+            
+            <div className="bg-rose-950/30 border border-rose-900/60 p-2 rounded-xl text-center min-w-[120px]">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-rose-400 block">Weakness Grid</span>
+              <span className="text-xs font-black text-rose-300">{CLASS_DATA[archetype].weakness}</span>
+            </div>
           </div>
+        </header>
+
+        {/* ROW 2: CRITICAL HP & ARMOR VITALS CONSOLE CARD GRID */}
+        <section className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3">
+          
+          {/* WOUNDS STATUS MODULE */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 block">Wounds</span>
+            <div className="flex items-center justify-center gap-2 my-1">
+              <button onClick={() => setWounds(Math.max(0, wounds - 1))} className="text-xs bg-gray-800 hover:bg-gray-700 w-5 h-5 rounded font-bold">-</button>
+              <span className={`text-xl font-black ${wounds > 0 ? 'text-red-400 animate-pulse' : 'text-gray-300'}`}>{wounds}</span>
+              <button onClick={() => setWounds(wounds + 1)} className="text-xs bg-gray-800 hover:bg-gray-700 w-5 h-5 rounded font-bold">+</button>
+            </div>
+            <span className="text-[9px] text-gray-500 font-medium">Injury Stack</span>
+          </div>
+
+          {/* MAX HP STAT CONTAINER */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 block">Max HP</span>
+            <input type="number" value={maxHp} onChange={(e) => setMaxHp(Number(e.target.value))} className="bg-transparent text-xl font-black text-gray-400 text-center w-full focus:outline-none my-1" />
+            <span className="text-[9px] text-gray-600 font-medium">Vital Pool Ceiling</span>
+          </div>
+
+          {/* CURRENT HP BAR CORE */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 block">Current HP</span>
+            <input type="number" value={hp} onChange={(e) => setHp(Number(e.target.value))} className="bg-transparent text-2xl font-black text-rose-400 text-center w-full focus:outline-none my-0.5" />
+            <div className="w-full bg-gray-950 h-1.5 rounded-full overflow-hidden">
+              <div className="bg-rose-500 h-full transition-all duration-300" style={{ width: `${Math.min(100, Math.max(0, (hp / maxHp) * 100))}%` }}></div>
+            </div>
+          </div>
+
+          {/* TEMPORARY HEALTH POOL */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 block">THP</span>
+            <input type="number" value={thp} onChange={(e) => setThp(Number(e.target.value))} className="bg-transparent text-xl font-black text-sky-400 text-center w-full focus:outline-none my-1" />
+            <span className="text-[9px] text-sky-500 font-medium">Shield Buffs</span>
+          </div>
+
+          {/* BASE ARMOR CLASS CELL */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 block">Base AC</span>
+            <input type="number" value={baseAc} onChange={(e) => setBaseAc(Number(e.target.value))} className="bg-transparent text-xl font-black text-blue-400 text-center w-full focus:outline-none my-1" />
+            <span className="text-[9px] text-gray-600 font-medium">Static Armor</span>
+          </div>
+
+          {/* TEMPORARY DEFENSE POOL (TAC) */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 block">TAC Pool</span>
+            <input type="number" value={tac} onChange={(e) => setTac(Number(e.target.value))} className="bg-transparent text-xl font-black text-teal-400 text-center w-full focus:outline-none my-1" />
+            <span className="text-[9px] text-teal-600 font-medium">Deflect Modifier</span>
+          </div>
+
+          {/* CALCULATED TOTAL ARMOR MATRICES PANEL */}
+          <div className={`border rounded-xl p-3 text-center flex flex-col justify-between transition-all col-span-2 sm:col-span-1 ${isPurgedActive ? 'bg-red-950/40 border-red-500 animate-pulse' : 'bg-emerald-950/20 border-emerald-800'}`}>
+            <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 block">Total AC</span>
+            <span className={`text-2xl font-black block my-0.5 ${isPurgedActive ? 'text-red-400' : 'text-emerald-400'}`}>{finalCalculatedAc}</span>
+            <span className="text-[8px] font-bold tracking-tight block text-gray-500 uppercase">
+              {isPurgedActive ? '⚠️ PURGE HALVED' : 'Calculated Live'}
+            </span>
+          </div>
+
         </section>
 
-        {/* MAIN CHARACTER SHEET DASHBOARD */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          {/* COLUMN 1 & 2: SHEET STATS & AFFINITIES */}
-          <div className="md:col-span-2 space-y-6">
-            
-            {/* CORE STATUS DISPLAY */}
-            <div className={`border-2 rounded-2xl p-6 shadow-2xl transition-all duration-300 ${currentAffinity.color}`}>
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <span className="text-xs font-black uppercase tracking-widest text-gray-400 block">Active Profile</span>
-                  <h2 className="text-3xl font-black tracking-tight text-white">{charName}</h2>
-                  <span className="text-sm font-semibold italic opacity-80">The {selectedClass}</span>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs font-black uppercase tracking-widest text-gray-400 block">Class Weapon Variant</span>
-                  <span className="text-lg font-bold text-white block">✨ {currentAffinity.minor} (Minor)</span>
-                </div>
-              </div>
-
-              {/* DYNAMIC VITAL STATS GRID */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6">
-                
-                {/* HEALTH CARD */}
-                <div className="bg-gray-950/80 border border-gray-800 rounded-xl p-3 text-center relative group">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 block">Vitals (HP)</span>
-                  <div className="flex justify-center items-baseline gap-1 mt-1">
-                    <input 
-                      type="number" value={hp} onChange={(e) => setHp(Number(e.target.value))}
-                      className="bg-transparent text-xl font-black text-rose-400 w-12 text-center focus:outline-none"
-                    />
-                    <span className="text-gray-500 text-sm">/</span>
-                    <input 
-                      type="number" value={maxHp} onChange={(e) => setMaxHp(Number(e.target.value))}
-                      className="bg-transparent text-sm font-bold text-gray-400 w-10 text-center focus:outline-none"
-                    />
-                  </div>
-                  <div className="w-full bg-gray-900 h-1.5 rounded-full mt-2 overflow-hidden">
-                    <div className="bg-rose-500 h-full transition-all" style={{ width: `${Math.min(100, Math.max(0, (hp/maxHp)*100))}%` }}></div>
-                  </div>
-                </div>
-
-                {/* DYNAMIC ARMOR CLASS CARD */}
-                <div className={`border rounded-xl p-3 text-center transition-all ${isPurged && !hasBuffs ? 'bg-red-950/50 border-red-500 animate-pulse' : 'bg-gray-950/80 border-gray-800'}`}>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 block">Defense (AC)</span>
-                  <div className="flex justify-center items-center gap-1 mt-1">
-                    <input 
-                      type="number" value={baseAc} onChange={(e) => setBaseAc(Number(e.target.value))}
-                      className={`bg-transparent text-2xl font-black w-12 text-center focus:outline-none ${isPurged && !hasBuffs ? 'text-red-400 line-through text-lg' : 'text-blue-400'}`}
-                    />
-                    {isPurged && !hasBuffs && (
-                      <span className="text-2xl font-black text-red-400">{finalAc}</span>
-                    )}
-                  </div>
-                  <span className="text-[9px] font-medium text-gray-400 block mt-1">
-                    {isPurged && !hasBuffs ? '⚠️ HALVED (Purged & No Buffs)' : 'Base Attribute'}
-                  </span>
-                </div>
-
-                {/* PRIMARY STAT CARD */}
-                <div className="bg-gray-950/80 border border-gray-800 rounded-xl p-3 text-center col-span-2 sm:col-span-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 block">Core Scaling Attribute</span>
-                  <span className="text-xl font-black text-emerald-400 block mt-1">✊ {currentAffinity.stat}</span>
-                </div>
-
-              </div>
-            </div>
-
-            {/* CLASS AFFINITIES DETAIL MATRICES */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-4 shadow-lg">
-              <h3 className="text-sm font-black uppercase tracking-wider text-gray-400 border-b border-gray-800 pb-2">🧬 Sheet Affinities ({selectedClass})</h3>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-gray-950 p-3 rounded-xl border border-gray-800">
-                  <span className="text-[10px] font-bold text-gray-500 block uppercase">Primary Output Type</span>
-                  <span className="text-lg font-bold text-teal-400 mt-1 block">🔮 {currentAffinity.dmgType} Damage</span>
-                </div>
-
-                <div className="bg-gray-950 p-3 rounded-xl border border-gray-800">
-                  <span className="text-[10px] font-bold text-gray-500 block uppercase">Signature Minor Action</span>
-                  <span className="text-lg font-bold text-amber-400 mt-1 block">⚡ {currentAffinity.minor}</span>
-                  {activeStatuses.Restrained && (
-                    <span className="text-[10px] text-red-400 font-bold block mt-1 animate-pulse">❌ Blocked by Restrained!</span>
-                  )}
-                </div>
-
-                <div className="bg-gray-950 p-3 rounded-xl border border-red-900/40">
-                  <span className="text-[10px] font-bold text-red-400 block uppercase tracking-wider">System Weakness</span>
-                  <span className="text-lg font-black text-rose-400 mt-1 block">💔 {currentAffinity.weakness}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* LIVE MODIFIER CONSOLE ALERT RULES */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3">
-              <h3 className="text-sm font-black uppercase tracking-wider text-gray-400">🚨 Active Rule Modifiers</h3>
-              
-              <div className="space-y-2">
-                {Object.keys(activeStatuses).filter(s => activeStatuses[s]).length === 0 ? (
-                  <p className="text-sm text-gray-500 italic py-2">Condition clean. No system rule penalties actively modified.</p>
-                ) : (
-                  Object.keys(activeStatuses).map(statusName => {
-                    if (!activeStatuses[statusName]) return null;
-                    return (
-                      <div key={statusName} className="flex gap-3 items-start bg-red-950/20 border border-red-900/60 p-3 rounded-xl">
-                        <span className="text-sm px-2 py-0.5 font-black uppercase tracking-wider bg-red-900/50 text-red-300 rounded border border-red-700 mt-0.5">
-                          {statusName}
-                        </span>
-                        <p className="text-sm text-gray-300 font-medium">{STATUS_EFFECTS[statusName]}</p>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-
+        {/* DICE ACTION LOGGER STATUS BAR */}
+        <div className="bg-gray-950 border border-gray-800 px-4 py-2.5 rounded-xl flex justify-between items-center text-xs">
+          <div className="flex gap-2 items-center">
+            <span className="text-gray-500 font-bold">DICE CONSOLE LOG:</span>
+            <span className="font-mono text-emerald-400 font-bold">{diceLog}</span>
           </div>
+          {diceLog !== 'Click a die to roll...' && (
+            <button onClick={() => setDiceLog('Click a die to roll...')} className="text-[10px] bg-gray-900 hover:bg-gray-800 text-gray-400 px-2 py-0.5 rounded">Clear</button>
+          )}
+        </div>
 
-          {/* COLUMN 3: INTERACTIVE BUFFS & DEBUFF PANEL */}
-          <div className="space-y-6">
+        {/* ROW 3: TWO COLUMN MAIN OPERATIONS INTERFACE */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          
+          {/* MAIN MATRIX ACTION GRID CONSOLE (LEFT 2 COLUMNS) */}
+          <div className="lg:col-span-2 space-y-5">
             
-            {/* INTERACTIVE DEBUFF BUTTONS */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 shadow-lg">
-              <h3 className="text-sm font-black uppercase tracking-wider text-gray-400 mb-3">⚠️ Apply Status Debuffs</h3>
-              <div className="flex flex-col gap-2">
-                {Object.keys(STATUS_EFFECTS).map(statusName => {
-                  const isApplied = activeStatuses[statusName];
-                  return (
-                    <button
-                      key={statusName}
-                      type="button"
-                      onClick={() => toggleStatus(statusName)}
-                      className={`w-full text-left px-4 py-3 rounded-xl border transition-all duration-200 flex justify-between items-center ${
-                        isApplied 
-                          ? 'bg-red-950/60 border-red-500 text-red-200 shadow-md ring-1 ring-red-500/30' 
-                          : 'bg-gray-950 border-gray-800 text-gray-400 hover:border-gray-700 hover:text-gray-200'
-                      }`}
-                    >
-                      <div className="flex flex-col">
-                        <span className={`text-sm font-bold ${isApplied ? 'text-red-400' : ''}`}>{statusName}</span>
-                        <span className="text-[10px] text-gray-500 truncate max-w-[180px] font-medium mt-0.5">{STATUS_EFFECTS[statusName]}</span>
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-lg">
+              <div className="bg-gray-950 px-4 py-3 border-b border-gray-800 flex justify-between items-center">
+                <h3 className="text-xs font-black uppercase tracking-wider text-gray-400">⚡ Engine Ability Modifier & Status Array</h3>
+                <span className="text-[10px] text-gray-500 font-medium">Interactive Session Matrix</span>
+              </div>
+
+              <div className="divide-y divide-gray-800/60">
+                {actionRows.map((row, index) => (
+                  <div key={index} className={`p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 transition-colors ${row.active ? 'bg-gray-950/40' : ''}`}>
+                    
+                    {/* Input modifier box */}
+                    <div className="flex items-center gap-3">
+                      <div className="bg-gray-950 border border-gray-800 rounded-lg p-1 flex items-center shadow-inner">
+                        <input 
+                          type="number" value={row.val} onChange={(e) => updateRowVal(index, e.target.value)}
+                          className="w-10 bg-transparent text-center font-black text-sm text-gray-200 focus:outline-none"
+                        />
                       </div>
-                      <span className="text-xs">{isApplied ? '🔴 ACTIVE' : '➕ Tap'}</span>
-                    </button>
+                      <span className={`text-xs font-bold ${row.active ? 'text-white' : 'text-gray-400'}`}>{row.label}</span>
+                    </div>
+
+                    {/* Interactive Toggles */}
+                    <div className="flex items-center justify-between sm:justify-end gap-3">
+                      <span className={`text-[10px] font-black uppercase px-2 py-1 rounded border tracking-wider text-center min-w-[75px] ${row.badgeColor}`}>
+                        {row.status}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => toggleRowActive(index)}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all border w-24 text-center ${
+                          row.active 
+                            ? 'bg-red-950/50 text-red-400 border-red-500 shadow-sm font-black' 
+                            : 'bg-gray-950 text-gray-500 border-gray-800 hover:border-gray-700'
+                        }`}
+                      >
+                        {row.active ? '🔴 ACTIVE' : 'Inactive'}
+                      </button>
+                    </div>
+
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ATTRIBUTES ROW NODES MATRIX */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg space-y-3">
+              <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 border-b border-gray-800 pb-2">📊 Attribute Matrices</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
+                {Object.keys(stats).map(statName => {
+                  const stat = stats[statName];
+                  const isMastered = stat.state === 'Mastered';
+                  const isWeak = stat.state === 'Weak';
+                  
+                  let stateColor = 'text-gray-400 border-gray-800 bg-gray-950';
+                  if (isMastered) stateColor = 'text-emerald-400 border-emerald-900 bg-emerald-950/20';
+                  if (isWeak) stateColor = 'text-amber-500 border-amber-900/60 bg-amber-950/20';
+
+                  return (
+                    <div 
+                      key={statName} 
+                      onClick={() => toggleStatState(statName, stat.state)}
+                      className={`border rounded-xl p-2.5 text-center cursor-pointer hover:scale-[1.03] transition shadow-sm flex flex-col justify-between min-h-[85px] ${stateColor}`}
+                    >
+                      <span className="text-[10px] font-black text-gray-500 uppercase tracking-tight block">{statName}</span>
+                      <span className="text-xl font-black block my-0.5 text-white">{stat.val}</span>
+                      <span className="text-[9px] font-bold uppercase tracking-tighter opacity-80 block truncate">
+                        {isMastered ? '⭐ Mstr' : isWeak ? '⚠️ Weak' : 'Normal'}
+                      </span>
+                    </div>
                   );
                 })}
               </div>
             </div>
 
-            {/* DYNAMIC BUFF TRACKER CONTAINER */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 shadow-lg">
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="text-sm font-black uppercase tracking-wider text-gray-400">🛡️ Active Buffs</h3>
-                <span className="text-xs bg-blue-950 border border-blue-800 text-blue-400 px-2 py-0.5 rounded-md font-bold">
-                  {buffsList.length} Active
+          </div>
+
+          {/* SIDEBAR OPERATIONAL INFORMATION CONSOLE (RIGHT 1 COLUMN) */}
+          <div className="space-y-5">
+            
+            {/* ACTION ROLLER METRICS PANEL */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg space-y-3">
+              <h3 className="text-xs font-black uppercase tracking-wider text-gray-400">🎲 Dynamic Movement & Attrition Rollers</h3>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <button 
+                  onClick={() => rollDice('spd', 'Speed (1d4+5)')}
+                  className="bg-gray-950 hover:bg-gray-900 border border-gray-800 hover:border-gray-700 p-3 rounded-xl text-center group transition"
+                >
+                  <span className="text-[10px] font-bold text-gray-500 block uppercase">Speed Stat</span>
+                  <span className="text-base font-black text-teal-400 group-hover:text-teal-300 block mt-1">🏃‍♂️ 1d4+5</span>
+                </button>
+
+                <button 
+                  onClick={() => rollDice('attrition', 'Attrition (d4)')}
+                  className="bg-gray-950 hover:bg-gray-900 border border-gray-800 hover:border-gray-700 p-3 rounded-xl text-center group transition"
+                >
+                  <span className="text-[10px] font-bold text-gray-500 block uppercase">Attrition Modifier</span>
+                  <span className="text-base font-black text-amber-500 group-hover:text-amber-400 block mt-1">⏳ d4 Roll</span>
+                </button>
+              </div>
+            </div>
+
+            {/* ROLE ABILITY MECHANICS CARD */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg space-y-3">
+              <div className="flex justify-between items-center border-b border-gray-800 pb-2">
+                <h3 className="text-xs font-black uppercase tracking-wider text-gray-400">🛡️ Active Role Features</h3>
+                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-teal-950 border border-teal-800 text-teal-400">
+                  {CLASS_DATA[archetype].minor}
                 </span>
               </div>
 
-              <form onSubmit={addBuff} className="flex gap-2 mb-4">
-                <input 
-                  type="text" placeholder="Add custom buff..." value={newBuffName} onChange={(e) => setNewBuffName(e.target.value)}
-                  className="bg-gray-950 border border-gray-800 rounded-xl px-3 py-1.5 text-xs text-gray-200 focus:outline-none focus:border-emerald-500 flex-1"
-                />
-                <button type="submit" className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3 rounded-xl transition">
-                  Add
-                </button>
-              </form>
-
-              <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                {buffsList.length === 0 ? (
-                  <p className="text-xs text-gray-500 italic py-2 text-center bg-gray-950 rounded-xl border border-dashed border-gray-800">
-                    No active buffs. {isPurged ? '❌ Purged blocks new buff creation!' : ''}
+              <div className="space-y-3">
+                <div>
+                  <h4 className="text-xs font-black text-emerald-400">Over Here!</h4>
+                  <p className="text-[11px] text-gray-400 leading-relaxed mt-1">
+                    Use an Action to roll <span className="text-white font-bold">Vitality against Vitality</span>. Target enemy you can see within 18 sq moves adjacent to the Defender. This movement can trigger Opportunity Attacks. On Critical, gain <span className="text-teal-400 font-bold">TAC</span> equal to your Vitality score.
                   </p>
-                ) : (
-                  buffsList.map((buff, i) => (
-                    <div key={i} className="flex justify-between items-center bg-gray-950 border border-gray-800 px-3 py-1.5 rounded-lg text-xs">
-                      <span className="font-bold text-blue-400">🛡️ {buff}</span>
-                      <button type="button" onClick={() => removeBuff(i)} className="text-gray-500 hover:text-red-400 transition font-bold px-1">✕</button>
-                    </div>
-                  ))
-                )}
+                </div>
+                <div className="bg-gray-950 border border-gray-800/80 p-2.5 rounded-xl">
+                  <span className="text-[10px] font-black text-amber-400 block uppercase tracking-wider">⚠️ Critical Warning Rule</span>
+                  <p className="text-[11px] text-gray-400 mt-0.5">On a roll of 1: Automatically gain <span className="text-teal-400 font-bold">1 TAC</span> asset point.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* EXP & PROGRESS MANAGEMENT PANEL */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg space-y-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-black uppercase tracking-wider text-gray-500">Experience Tracking (XP)</label>
+                <input type="text" value={xp} onChange={(e) => setXp(e.target.value)} className="bg-gray-950 border border-gray-800 rounded-xl px-3 py-1.5 font-mono text-xs font-bold text-amber-400 focus:outline-none focus:border-emerald-500 w-full" />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-black uppercase tracking-wider text-gray-500">Inventory Logs</label>
+                <textarea 
+                  value={inventory} rows={2} onChange={(e) => setInventory(e.target.value)}
+                  className="bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs font-medium text-gray-300 focus:outline-none focus:border-emerald-500 w-full resize-none"
+                />
               </div>
             </div>
 
