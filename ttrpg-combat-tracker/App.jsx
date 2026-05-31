@@ -24,7 +24,8 @@ export default function App() {
   const [hp, setHp] = useState(24);
   const [thp, setThp] = useState(0);
   const [baseAc, setBaseAc] = useState(2);
-  const [tac, setTac] = useState(0);
+  const [tempAc, setTempAc] = useState(0);
+  const [totalAcMod, setTotalAcMod] = useState(0); // Manual leveling adjustments for Total AC
   
   // Custom Leveling Dice Formulas
   const [spdDice, setSpdDice] = useState({ count: 1, faces: 4, mod: 5 });
@@ -33,7 +34,7 @@ export default function App() {
   // Virtual Dice Log State
   const [diceLog, setDiceLog] = useState('Click a die or action to roll...');
 
-  // Attribute Node States (Click number to increase up to 5)
+  // Attribute Node States (Clamped cleanly 0-5)
   const [stats, setStats] = useState({
     Might: { val: 1, state: 'Normal' },
     Agility: { val: 1, state: 'Weak' },
@@ -74,9 +75,9 @@ export default function App() {
 
   const [xp, setXp] = useState('120 / 300');
 
-  // Dynamic Rule Calculation Engine
+  // Dynamic Rule Calculation Engine (Base + Temp AC + Leveling Modifiers)
   const isPurgedActive = actionRows.find(r => r.status === 'Purge')?.active;
-  const computedTotalAc = baseAc + tac;
+  const computedTotalAc = baseAc + tempAc + totalAcMod;
   const finalCalculatedAc = isPurgedActive ? Math.floor(computedTotalAc / 2) : computedTotalAc;
 
   // Programmable Dice Roller
@@ -98,29 +99,6 @@ export default function App() {
     const faces = parseInt(dieString.replace('d', ''), 10);
     const roll = Math.floor(Math.random() * faces) + 1;
     setDiceLog(`⚔️ Used ${itemName} (${dieString}): Rolled [ ${roll} ]`);
-  };
-
-  // Click handler to scale stats up to 5
-  const incrementStatValue = (statName) => {
-    setStats(prev => {
-      const currentVal = prev[statName].val;
-      const nextVal = currentVal >= 5 ? 0 : currentVal + 1;
-      return {
-        ...prev,
-        [statName]: { ...prev[statName], val: nextVal }
-      };
-    });
-  };
-
-  const cycleStatState = (e, statName) => {
-    e.stopPropagation();
-    const states = ['Normal', 'Weak', 'Mastered'];
-    const current = stats[statName].state;
-    const nextIndex = (states.indexOf(current) + 1) % states.length;
-    setStats({
-      ...stats,
-      [statName]: { ...stats[statName], state: states[nextIndex] }
-    });
   };
 
   // Inventory Handlers
@@ -161,7 +139,6 @@ export default function App() {
               {Object.keys(CLASS_DATA).map(cls => <option key={cls} value={cls}>{cls}</option>)}
             </select>
             
-            {/* NEW AUTOMATED ARCHETYPE DROPDOWN */}
             <select value={archetypeSelection} onChange={(e) => setArchetypeSelection(e.target.value)} className="bg-gray-950 border border-gray-800 text-xs font-black rounded-xl p-2 text-gray-300 focus:outline-none">
               {ARCHETYPES.map(arch => <option key={arch} value={arch}>{arch}</option>)}
             </select>
@@ -173,7 +150,7 @@ export default function App() {
           </div>
         </header>
 
-        {/* ROW 2: CRITICAL VITALS MATRIX (With New Micro-Increment Steppers) */}
+        {/* ROW 2: CRITICAL VITALS MATRIX */}
         <section className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3">
           
           {/* Wounds Module */}
@@ -194,7 +171,7 @@ export default function App() {
             <span className="text-[9px] text-gray-600 font-medium">Ceiling Pool</span>
           </div>
 
-          {/* Current HP Card (with manual step bars) */}
+          {/* Current HP Card */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Current HP</span>
             <div className="flex items-center justify-between bg-gray-950 rounded-lg p-1 border border-gray-800 my-1">
@@ -207,7 +184,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Temporary HP Card (with manual step bars) */}
+          {/* Temporary HP Card */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Temp HP</span>
             <div className="flex items-center justify-between bg-gray-950 rounded-lg p-1 border border-gray-800 my-1">
@@ -225,22 +202,28 @@ export default function App() {
             <span className="text-[9px] text-gray-600 font-medium">Static Armor</span>
           </div>
 
-          {/* TAC Asset Card (with manual step bars) */}
+          {/* UPDATED: TEMP AC Card */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">TAC Asset</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Temp AC</span>
             <div className="flex items-center justify-between bg-gray-950 rounded-lg p-1 border border-gray-800 my-1">
-              <button type="button" onClick={() => setTac(Math.max(0, tac - 1))} className="text-xs font-black text-teal-500 hover:text-teal-400 px-1.5">-</button>
-              <input type="number" value={tac} onChange={(e) => setTac(Number(e.target.value))} className="bg-transparent text-sm font-black text-center w-full focus:outline-none text-teal-400" />
-              <button type="button" onClick={() => setTac(tac + 1)} className="text-xs font-black text-teal-500 hover:text-teal-400 px-1.5">+</button>
+              <button type="button" onClick={() => setTempAc(Math.max(0, tempAc - 1))} className="text-xs font-black text-teal-500 hover:text-teal-400 px-1.5">-</button>
+              <input type="number" value={tempAc} onChange={(e) => setTempAc(Number(e.target.value))} className="bg-transparent text-sm font-black text-center w-full focus:outline-none text-teal-400" />
+              <button type="button" onClick={() => setTempAc(tempAc + 1)} className="text-xs font-black text-teal-500 hover:text-teal-400 px-1.5">+</button>
             </div>
             <span className="text-[9px] text-teal-600 font-medium">Deflections</span>
           </div>
 
-          {/* Calculated Total AC Card */}
+          {/* UPDATED: INTERACTIVE TOTAL AC OVERRIDE */}
           <div className={`border rounded-xl p-3 text-center flex flex-col justify-between transition-all col-span-2 sm:col-span-1 ${isPurgedActive ? 'bg-red-950/40 border-red-500 animate-pulse' : 'bg-emerald-950/20 border-emerald-800'}`}>
             <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 block">Total AC</span>
-            <span className={`text-2xl font-black block my-0.5 ${isPurgedActive ? 'text-red-400' : 'text-emerald-400'}`}>{finalCalculatedAc}</span>
-            <span className="text-[8px] font-bold tracking-tight block text-gray-500 uppercase">{isPurgedActive ? '⚠️ PURGED' : 'Live AC'}</span>
+            <div className="flex items-center justify-between bg-gray-950/80 rounded-lg p-1 border border-gray-800/80 my-1">
+              <button type="button" onClick={() => setTotalAcMod(totalAcMod - 1)} className="text-xs font-black text-gray-500 hover:text-white px-1.5" title="Lower total AC modifier">-</button>
+              <span className={`text-base font-black ${isPurgedActive ? 'text-red-400' : 'text-emerald-400'}`}>{finalCalculatedAc}</span>
+              <button type="button" onClick={() => setTotalAcMod(totalAcMod + 1)} className="text-xs font-black text-gray-500 hover:text-white px-1.5" title="Raise total AC modifier">+</button>
+            </div>
+            <span className="text-[8px] font-bold tracking-tight block text-gray-500 uppercase">
+              {totalAcMod !== 0 ? `Level Mod: ${totalAcMod >= 0 ? '+' : ''}${totalAcMod}` : (isPurgedActive ? '⚠️ PURGED' : 'Live AC')}
+            </span>
           </div>
 
         </section>
@@ -262,11 +245,11 @@ export default function App() {
           {/* MAIN INTERACTION BLOCK (LEFT/CENTER) */}
           <div className="lg:col-span-2 space-y-5">
             
-            {/* ATTRIBUTE INCREMENT MATRICES */}
+            {/* UPDATED: FULLY DECOUPLED ATTRIBUTE NODES GRID */}
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg space-y-3">
               <div className="flex justify-between items-center border-b border-gray-800 pb-2">
-                <h3 className="text-xs font-black uppercase tracking-wider text-gray-400">📊 Core Stats (Tap Number to Level Up, Max 5)</h3>
-                <span className="text-[9px] bg-gray-950 text-gray-500 px-2 py-0.5 rounded font-mono">0-5 Cap</span>
+                <h3 className="text-xs font-black uppercase tracking-wider text-gray-400">📊 Core Stats Array (0-5 Cap)</h3>
+                <span className="text-[9px] bg-gray-950 text-gray-500 px-2 py-0.5 rounded font-mono">Independent Arrays</span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
                 {Object.keys(stats).map(statName => {
@@ -274,24 +257,47 @@ export default function App() {
                   const isMastered = stat.state === 'Mastered';
                   const isWeak = stat.state === 'Weak';
                   
-                  let themeStyles = 'border-gray-800 bg-gray-950 hover:border-gray-700';
-                  if (isMastered) themeStyles = 'border-emerald-900 bg-emerald-950/20 hover:bg-emerald-950/30';
-                  if (isWeak) themeStyles = 'border-amber-900/60 bg-amber-950/20 hover:bg-amber-950/30';
+                  let themeStyles = 'border-gray-800 bg-gray-950';
+                  if (isMastered) themeStyles = 'border-emerald-900 bg-emerald-950/20';
+                  if (isWeak) themeStyles = 'border-amber-900/60 bg-amber-950/20';
 
                   return (
-                    <div 
-                      key={statName} 
-                      onClick={() => incrementStatValue(statName)}
-                      className={`border rounded-xl p-2.5 text-center cursor-pointer transition select-none flex flex-col justify-between min-h-[95px] active:scale-95 ${themeStyles}`}
-                      title="Click value to increase, click label below to toggle condition state"
-                    >
+                    <div key={statName} className={`border rounded-xl p-2 text-center flex flex-col justify-between min-h-[110px] ${themeStyles}`}>
                       <span className="text-[10px] font-black text-gray-500 uppercase tracking-tight block">{statName}</span>
-                      <span className="text-2xl font-black block my-1 text-white">{stat.val}</span>
                       
+                      {/* Independent Stepper Control Block for Value Tracking */}
+                      <div className="flex items-center justify-between bg-gray-900/60 rounded-lg p-1 border border-gray-800/80 my-1 mx-auto w-full max-w-[70px]">
+                        <button 
+                          type="button" 
+                          onClick={() => setStats(prev => ({
+                            ...prev, 
+                            [statName]: { ...prev[statName], val: Math.max(0, prev[statName].val - 1) }
+                          }))}
+                          className="text-xs font-black text-gray-500 hover:text-white px-1"
+                        >-</button>
+                        <span className="text-sm font-black text-white">{stat.val}</span>
+                        <button 
+                          type="button" 
+                          onClick={() => setStats(prev => ({
+                            ...prev, 
+                            [statName]: { ...prev[statName], val: Math.min(5, prev[statName].val + 1) }
+                          }))}
+                          className="text-xs font-black text-gray-500 hover:text-white px-1"
+                        >+</button>
+                      </div>
+                      
+                      {/* Isolated Passive Status Trigger Toggles */}
                       <button
                         type="button"
-                        onClick={(e) => cycleStatState(e, statName)}
-                        className={`text-[9px] font-bold uppercase tracking-tighter px-1 py-0.5 rounded transition ${
+                        onClick={() => {
+                          const states = ['Normal', 'Weak', 'Mastered'];
+                          const nextIndex = (states.indexOf(stat.state) + 1) % states.length;
+                          setStats(prev => ({
+                            ...prev,
+                            [statName]: { ...prev[statName], state: states[nextIndex] }
+                          }));
+                        }}
+                        className={`text-[9px] font-bold uppercase tracking-tighter py-0.5 w-full rounded transition ${
                           isMastered ? 'bg-emerald-900/40 text-emerald-400' : isWeak ? 'bg-amber-900/40 text-amber-500' : 'bg-gray-900 text-gray-400 hover:text-white'
                         }`}
                       >
