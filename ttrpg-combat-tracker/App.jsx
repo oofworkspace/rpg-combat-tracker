@@ -224,7 +224,7 @@ export default function App() {
             <span className="text-[9px] text-sky-600 font-medium">Shielding</span>
           </div>
 
-          {/* NEW ADAPTABLE CLASS RESOURCE / MP CURRENCY FIELD */}
+          {/* ADAPTABLE CLASS RESOURCE / MP CURRENCY FIELD */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
             <input 
               type="text" value={resourceLabel} onChange={(e) => setResourceLabel(e.target.value)}
@@ -355,11 +355,15 @@ export default function App() {
               </div>
             </div>
 
-            {/* SEPARATED BLOCK 1: ISOLATED BATTLE ACTION MODIFIERS */}
+            {/* UNIFIED COMBAT ENGAGEMENT HUB (Combined layout with structural separator bar) */}
             <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-lg">
+              
+              {/* Top Sub-Section Header: Actions */}
               <div className="bg-gray-950 px-4 py-2.5 border-b border-gray-800">
                 <h3 className="text-xs font-black uppercase tracking-wider text-emerald-400">⚡ Combat Turn Actions & Multipliers</h3>
               </div>
+              
+              {/* Actions Grid */}
               <div className="divide-y divide-gray-800/60 p-2 space-y-1">
                 {actionRows.map((row, index) => (
                   <div key={index} className="p-2 flex items-center justify-between gap-3 bg-gray-950/40 rounded-xl border border-gray-850">
@@ -378,46 +382,52 @@ export default function App() {
                   </div>
                 ))}
               </div>
-            </div>
 
-            {/* SEPARATED BLOCK 2: NEW STATUS EFFECTS ENGAGEMENT MATRIX (Data from image_7b5eb5.png) */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-lg">
-              <div className="bg-gray-950 px-4 py-2.5 border-b border-gray-800 flex justify-between items-center">
-                <h3 className="text-xs font-black uppercase tracking-wider text-rose-400">⚠️ Active Combat Status Conditions</h3>
-                <span className="text-[9px] text-gray-500 font-mono">Reference Matrix: image_7b5eb5.png</span>
+              {/* HEAVY VISUAL SEPARATING BAR (UI/UX Anchor Point) */}
+              <div className="bg-gray-950 px-4 py-3 border-t-2 border-b border-gray-850 flex justify-between items-center mt-2">
+                <h3 className="text-xs font-black uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
+                  <span>⚠️ Active Combat Status Conditions</span>
+                </h3>
+                <span className="text-[9px] text-gray-500 font-mono tracking-tight">Reference Matrix: image_7b5eb5.png</span>
               </div>
-              <div className="divide-y divide-gray-800/60 p-2 space-y-1.5">
+
+              {/* Status Conditions Grid - ENHANCED READABILITY & LARGER FONTS */}
+              <div className="divide-y divide-gray-800/60 p-2 space-y-2">
                 {statusEffects.map((effect, idx) => (
                   <div 
                     key={effect.name} 
-                    className={`p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all ${
+                    className={`p-3.5 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all ${
                       effect.active 
-                        ? 'bg-gray-950 border-rose-900/60 shadow-md' 
-                        : 'bg-gray-900/30 border-gray-800/50 opacity-60'
+                        ? 'bg-gray-950 border-rose-900/80 shadow-md ring-1 ring-rose-900/20' 
+                        : 'bg-gray-900/20 border-gray-800/40 opacity-70'
                     }`}
                   >
                     {/* Status Label & Resistance Check Details */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 max-w-md">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-black text-white tracking-wide w-20">{effect.name}</span>
-                        <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border tracking-tight ${effect.color}`}>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
+                      <div className="flex items-center gap-2.5 shrink-0">
+                        {/* Enlarged Name font */}
+                        <span className="text-sm md:text-base font-black text-white tracking-wide min-w-[90px]">{effect.name}</span>
+                        {/* Enlarged Check font */}
+                        <span className={`text-xs font-mono font-black px-2 py-0.5 rounded border tracking-wide shadow-sm ${effect.color}`}>
                           {effect.check}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-400 leading-normal pl-0 sm:pl-2 border-l-0 sm:border-l border-gray-800">
+                      {/* Brighter, larger description typography to eliminate squinting */}
+                      <p className="text-sm text-gray-250 font-medium leading-relaxed pl-0 sm:pl-3 border-l-0 sm:border-l border-gray-800">
                         {effect.effect}
                       </p>
                     </div>
 
                     {/* Operational Trigger & Round Counter Layout */}
-                    <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-gray-850 pt-2 sm:pt-0">
+                    <div className="flex items-center justify-between md:justify-end gap-4 border-t md:border-t-0 border-gray-850 pt-2.5 md:pt-0 shrink-0">
+                      
                       {/* Active Duration Stepper Counter Deck */}
                       <div className="flex flex-col items-center">
-                        <span className="text-[8px] uppercase tracking-wider text-gray-500 font-bold mb-0.5">Turns</span>
-                        <div className="flex items-center bg-gray-950 border border-gray-800 rounded-lg px-1 py-0.5">
-                          <button type="button" onClick={() => handleDurationChange(idx, -1)} className="text-[10px] font-black text-gray-500 hover:text-white px-1">-</button>
-                          <span className="text-xs font-mono font-black px-1 text-amber-400 min-w-[12px] text-center">{effect.duration}</span>
-                          <button type="button" onClick={() => handleDurationChange(idx, 1)} className="text-[10px] font-black text-gray-500 hover:text-white px-1">+</button>
+                        <span className="text-[9px] uppercase tracking-wider text-gray-500 font-bold mb-0.5">Turns</span>
+                        <div className="flex items-center bg-gray-950 border border-gray-800 rounded-lg px-1.5 py-0.5">
+                          <button type="button" onClick={() => handleDurationChange(idx, -1)} className="text-xs font-black text-gray-400 hover:text-white px-1">-</button>
+                          <span className="text-sm font-mono font-black px-1.5 text-amber-400 min-w-[16px] text-center">{effect.duration}</span>
+                          <button type="button" onClick={() => handleDurationChange(idx, 1)} className="text-xs font-black text-gray-400 hover:text-white px-1">+</button>
                         </div>
                       </div>
 
@@ -425,10 +435,10 @@ export default function App() {
                       <button
                         type="button"
                         onClick={() => toggleStatusEffect(idx)}
-                        className={`text-xs font-black px-3 py-1.5 rounded-xl border w-24 text-center transition ${
+                        className={`text-xs font-black px-3 py-2 rounded-xl border w-28 text-center tracking-wide transition-all ${
                           effect.active 
-                            ? 'bg-rose-950/50 text-rose-400 border-rose-600 shadow-inner' 
-                            : 'bg-gray-950 text-gray-600 border-gray-850 hover:text-gray-400'
+                            ? 'bg-rose-950/60 text-rose-400 border-rose-500 shadow-inner font-extrabold' 
+                            : 'bg-gray-950 text-gray-500 border-gray-850 hover:text-gray-300 hover:border-gray-700'
                         }`}
                       >
                         {effect.active ? '🔴 AFFLICTED' : 'Clear'}
