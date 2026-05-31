@@ -23,14 +23,16 @@ export default function App() {
   const [maxHp, setMaxHp] = useState(24);
   const [hp, setHp] = useState(24);
   const [thp, setThp] = useState(0);
+  
+  // Consolidated AC Backing Values
   const [baseAc, setBaseAc] = useState(2);
   const [tempAc, setTempAc] = useState(0);
   const [totalAcMod, setTotalAcMod] = useState(0);
 
-  // Class Currency / Adaptable MP Asset Engine
+  // Class Currency / Adaptable MP Asset Engine (Higher Thresholds)
   const [resourceLabel, setResourceLabel] = useState('MP');
-  const [currentResource, setCurrentResource] = useState(10);
-  const [maxResource, setMaxResource] = useState(10);
+  const [currentResource, setCurrentResource] = useState(35);
+  const [maxResource, setMaxResource] = useState(50);
   
   // Custom Leveling Dice Formulas
   const [spdDice, setSpdDice] = useState({ count: 1, faces: 4, mod: 5 });
@@ -183,7 +185,7 @@ export default function App() {
         <section className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
           
           {/* Wounds Module */}
-          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md">
+          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md col-span-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Wounds</span>
             <div className="flex items-center justify-between bg-[#0b111e] rounded-lg p-1 border border-slate-800 my-1">
               <button type="button" onClick={() => setWounds(Math.max(0, wounds - 1))} className="text-xs font-black text-slate-500 hover:text-white px-1.5">-</button>
@@ -194,14 +196,14 @@ export default function App() {
           </div>
 
           {/* Max HP Stat Container */}
-          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md">
+          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md col-span-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Max HP</span>
             <input type="number" value={maxHp} onChange={(e) => setMaxHp(Number(e.target.value))} className="bg-transparent text-xl font-black text-slate-300 text-center w-full focus:outline-none my-1" />
             <span className="text-[9px] text-slate-600 font-medium">Ceiling Pool</span>
           </div>
 
           {/* Current HP Card */}
-          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md">
+          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md col-span-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Current HP</span>
             <div className="flex items-center justify-between bg-[#0b111e] rounded-lg p-1 border border-slate-800 my-1">
               <button type="button" onClick={() => setHp(Math.max(0, hp - 1))} className="text-xs font-black text-rose-500 hover:text-rose-400 px-1.5">-</button>
@@ -214,7 +216,7 @@ export default function App() {
           </div>
 
           {/* Temporary HP Card */}
-          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md">
+          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md col-span-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Temp HP</span>
             <div className="flex items-center justify-between bg-[#0b111e] rounded-lg p-1 border border-slate-800 my-1">
               <button type="button" onClick={() => setThp(Math.max(0, thp - 1))} className="text-xs font-black text-sky-500 hover:text-sky-400 px-1.5">-</button>
@@ -225,7 +227,7 @@ export default function App() {
           </div>
 
           {/* ADAPTABLE CLASS RESOURCE / MP CURRENCY FIELD */}
-          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md">
+          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md col-span-1">
             <input 
               type="text" value={resourceLabel} onChange={(e) => setResourceLabel(e.target.value)}
               className="text-[10px] bg-transparent font-bold uppercase tracking-wider text-purple-400 text-center focus:outline-none border-b border-transparent hover:border-slate-800 focus:border-purple-600 w-full"
@@ -236,41 +238,49 @@ export default function App() {
               <div className="flex items-center justify-center font-mono text-xs font-black text-white w-full">
                 <span>{currentResource}</span>
                 <span className="text-slate-600 mx-0.5">/</span>
-                <input type="number" value={maxResource} onChange={(e) => setMaxResource(Number(e.target.value))} className="w-6 bg-transparent text-center text-slate-400 text-xs focus:outline-none font-bold" />
+                <input type="number" value={maxResource} onChange={(e) => setMaxResource(Number(e.target.value))} className="w-8 bg-transparent text-center text-slate-400 text-xs focus:outline-none font-bold" />
               </div>
               <button type="button" onClick={() => setCurrentResource(Math.min(maxResource, currentResource + 1))} className="text-xs font-black text-purple-400 hover:text-purple-300 px-1">+</button>
             </div>
             <span className="text-[9px] text-purple-600 font-medium">Class Drive</span>
           </div>
 
-          {/* Base AC Card */}
-          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Base AC</span>
-            <input type="number" value={baseAc} onChange={(e) => setBaseAc(Number(e.target.value))} className="bg-transparent text-xl font-black text-blue-400 text-center w-full focus:outline-none my-1" />
-            <span className="text-[9px] text-slate-600 font-medium">Static Armor</span>
-          </div>
+          {/* CONSOLIDATED UNIFIED ARMOR CLASS CONSOLE */}
+          <div className={`border rounded-xl p-3 flex flex-col justify-between transition-all col-span-2 sm:col-span-2 lg:col-span-3 shadow-md ${
+            isPurgedActive ? 'bg-red-950/20 border-red-500' : 'bg-blue-950/10 border-blue-900/50'
+          }`}>
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block text-left">Armor Class Profile</span>
+            
+            <div className="flex items-center justify-between gap-3 my-1">
+              {/* Giant Auto-Updating Absolute Monitor Box */}
+              <div className="flex flex-col items-center justify-center bg-[#0b111e]/90 border border-slate-800 rounded-xl p-1.5 min-w-[65px] h-12 shrink-0 shadow-inner">
+                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-tight">Total AC</span>
+                <span className={`text-xl font-black leading-none ${isPurgedActive ? 'text-red-400 animate-pulse' : 'text-blue-400'}`}>
+                  {finalCalculatedAc}
+                </span>
+              </div>
 
-          {/* Temp AC Card */}
-          <div className="bg-[#131a26] border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between shadow-md">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Temp AC</span>
-            <div className="flex items-center justify-between bg-[#0b111e] rounded-lg p-1 border border-slate-800 my-1">
-              <button type="button" onClick={() => setTempAc(Math.max(0, tempAc - 1))} className="text-xs font-black text-teal-500 hover:text-teal-400 px-1.5">-</button>
-              <input type="number" value={tempAc} onChange={(e) => setTempAc(Number(e.target.value))} className="bg-transparent text-sm font-black text-center w-full focus:outline-none text-teal-400" />
-              <button type="button" onClick={() => setTempAc(tempAc + 1)} className="text-xs font-black text-teal-500 hover:text-teal-400 px-1.5">+</button>
-            </div>
-            <span className="text-[9px] text-teal-600 font-medium">Deflections</span>
-          </div>
+              {/* Integrated Nested Inputs Deck */}
+              <div className="grid grid-cols-3 gap-1.5 w-full">
+                <div className="bg-[#0b111e]/60 border border-slate-800 p-1 rounded-lg text-center">
+                  <span className="text-[8px] font-bold text-slate-500 block uppercase">Base</span>
+                  <input type="number" value={baseAc} onChange={(e) => setBaseAc(Number(e.target.value))} className="bg-transparent text-xs font-black text-center w-full focus:outline-none text-slate-200" />
+                </div>
+                
+                <div className="bg-[#0b111e]/60 border border-slate-800 p-1 rounded-lg text-center">
+                  <span className="text-[8px] font-bold text-slate-500 block uppercase">Temp</span>
+                  <input type="number" value={tempAc} onChange={(e) => setTempAc(Number(e.target.value))} className="bg-transparent text-xs font-black text-center w-full focus:outline-none text-teal-400" />
+                </div>
 
-          {/* INTERACTIVE TOTAL AC OVERRIDE */}
-          <div className={`border rounded-xl p-3 text-center flex flex-col justify-between transition-all col-span-2 sm:col-span-1 shadow-md ${isPurgedActive ? 'bg-red-950/20 border-red-500 animate-pulse' : 'bg-emerald-950/10 border-emerald-800'}`}>
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Total AC</span>
-            <div className="flex items-center justify-between bg-[#0b111e]/80 rounded-lg p-1 border border-slate-800 my-1">
-              <button type="button" onClick={() => setTotalAcMod(totalAcMod - 1)} className="text-xs font-black text-slate-500 hover:text-white px-1.5">-</button>
-              <span className={`text-base font-black ${isPurgedActive ? 'text-red-400' : 'text-emerald-400'}`}>{finalCalculatedAc}</span>
-              <button type="button" onClick={() => setTotalAcMod(totalAcMod + 1)} className="text-xs font-black text-slate-500 hover:text-white px-1.5">+</button>
+                <div className="bg-[#0b111e]/60 border border-slate-800 p-1 rounded-lg text-center">
+                  <span className="text-[8px] font-bold text-slate-500 block uppercase">Mod</span>
+                  <input type="number" value={totalAcMod} onChange={(e) => setTotalAcMod(Number(e.target.value))} className="bg-transparent text-xs font-black text-center w-full focus:outline-none text-emerald-400" />
+                </div>
+              </div>
             </div>
+
             <span className="text-[8px] font-bold tracking-tight block text-slate-500 uppercase">
-              {totalAcMod !== 0 ? `Mod: ${totalAcMod >= 0 ? '+' : ''}${totalAcMod}` : (isPurgedActive ? '⚠️ PURGED (-2)' : 'Live AC')}
+              {isPurgedActive ? '⚠️ PURGED EFFECT INFLICTED (-2 AC)' : 'Live Calculations Active'}
             </span>
           </div>
 
@@ -391,7 +401,7 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* SUB-TABLE RIGHT: ACTIVE COMBAT STATUSES (Perfect Grid Realignment based on image_7a9083.png) */}
+                {/* SUB-TABLE RIGHT: ACTIVE COMBAT STATUSES */}
                 <div className="lg:col-span-8 p-5 space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-xs font-black uppercase tracking-wider text-rose-400 flex items-center gap-2">
