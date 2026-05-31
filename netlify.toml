@@ -1,0 +1,4 @@
+[build]
+  base = "ttrpg-combat-tracker"
+  command = "npm run build"
+  publish = "ttrpg-combat-tracker/dist"
