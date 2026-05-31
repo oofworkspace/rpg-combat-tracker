@@ -25,7 +25,12 @@ export default function App() {
   const [thp, setThp] = useState(0);
   const [baseAc, setBaseAc] = useState(2);
   const [tempAc, setTempAc] = useState(0);
-  const [totalAcMod, setTotalAcMod] = useState(0); // Manual leveling adjustments for Total AC
+  const [totalAcMod, setTotalAcMod] = useState(0);
+
+  // Class Currency / Adaptable MP Asset Engine
+  const [resourceLabel, setResourceLabel] = useState('MP');
+  const [currentResource, setCurrentResource] = useState(10);
+  const [maxResource, setMaxResource] = useState(10);
   
   // Custom Leveling Dice Formulas
   const [spdDice, setSpdDice] = useState({ count: 1, faces: 4, mod: 5 });
@@ -45,14 +50,24 @@ export default function App() {
     Charisma: { val: 2, state: 'Normal' },
   });
 
-  // Action Grid Console Row Data
+  // Isolated Numeric Action Grid Modifiers
   const [actionRows, setActionRows] = useState([
-    { label: 'Attack Bonus', val: 0, status: 'Ignite', badgeColor: 'bg-red-900 text-red-200 border-red-700', active: false },
-    { label: 'TAKE COVER (AC range)', val: 0, status: 'Panic', badgeColor: 'bg-purple-900 text-purple-200 border-purple-700', active: false },
-    { label: 'DEFEND (AC melee)', val: 0, status: 'Purge', badgeColor: 'bg-blue-900 text-blue-200 border-blue-700', active: false },
-    { label: 'STEADY (DMG Range)', val: 0, status: 'Restrain', badgeColor: 'bg-sky-900 text-sky-200 border-sky-700', active: false },
-    { label: 'CLEAVE (attacked next melee)', val: 0, status: 'Daze', badgeColor: 'bg-amber-900 text-amber-200 border-amber-800', active: false },
-    { label: 'AURA (- to AC)', val: 4, status: 'Blind', badgeColor: 'bg-yellow-900 text-yellow-100 border-yellow-600', active: false },
+    { label: 'Attack Bonus', val: 0 },
+    { label: 'TAKE COVER (AC range)', val: 0 },
+    { label: 'DEFEND (AC melee)', val: 0 },
+    { label: 'STEADY (DMG Range)', val: 0 },
+    { label: 'CLEAVE (attacked next melee)', val: 0 },
+    { label: 'AURA (- to AC)', val: 4 },
+  ]);
+
+  // Comprehensive Status Effects Data Array (Verbatim Mapping from image_7b5eb5.png)
+  const [statusEffects, setStatusEffects] = useState([
+    { name: 'Panic', check: 'Might<4', effect: 'Advantage on next Attack against this target', color: 'bg-red-600 border-red-500 text-white', active: false, duration: 1 },
+    { name: 'Dazed', check: 'Agility<4', effect: 'Only one Action on turn', color: 'bg-yellow-500 border-yellow-400 text-gray-950', active: false, duration: 1 },
+    { name: 'Restrained', check: 'Vitality<4', effect: 'Cannot use Move Action', color: 'bg-amber-800 border-amber-700 text-amber-100', active: false, duration: 1 },
+    { name: 'Poisoned', check: 'Ingenuity<4', effect: 'Disadvantage on rolls', color: 'bg-green-700 border-green-600 text-green-100', active: false, duration: 1 },
+    { name: 'Frozen', check: 'Awareness<4', effect: 'Cannot use Attack Action', color: 'bg-blue-600 border-blue-500 text-white', active: false, duration: 1 },
+    { name: 'Purge', check: 'Spirit<4', effect: 'Remove all buffs from target, if they have no buffs lower AC by 2', color: 'bg-purple-700 border-purple-600 text-purple-100', active: false, duration: 1 },
   ]);
 
   // On-Roll Attacks Manual Inputs Ledger
@@ -76,9 +91,9 @@ export default function App() {
   const [xp, setXp] = useState('120 / 300');
 
   // Dynamic Rule Calculation Engine (Base + Temp AC + Leveling Modifiers)
-  const isPurgedActive = actionRows.find(r => r.status === 'Purge')?.active;
+  const isPurgedActive = statusEffects.find(s => s.name === 'Purge')?.active;
   const computedTotalAc = baseAc + tempAc + totalAcMod;
-  const finalCalculatedAc = isPurgedActive ? Math.floor(computedTotalAc / 2) : computedTotalAc;
+  const finalCalculatedAc = isPurgedActive ? Math.max(0, computedTotalAc - 2) : computedTotalAc;
 
   // Programmable Dice Roller
   const executeRoll = (count, faces, mod, labelText) => {
@@ -111,6 +126,20 @@ export default function App() {
 
   const handleRemoveItem = (id) => {
     setInventoryList(inventoryList.filter(item => item.id !== id));
+  };
+
+  // Status Action Toggle
+  const toggleStatusEffect = (index) => {
+    const updated = [...statusEffects];
+    updated[index].active = !updated[index].active;
+    setStatusEffects(updated);
+  };
+
+  // Status Duration Step Handler
+  const handleDurationChange = (index, delta) => {
+    const updated = [...statusEffects];
+    updated[index].duration = Math.max(0, updated[index].duration + delta);
+    setStatusEffects(updated);
   };
 
   return (
@@ -151,7 +180,7 @@ export default function App() {
         </header>
 
         {/* ROW 2: CRITICAL VITALS MATRIX */}
-        <section className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3">
+        <section className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
           
           {/* Wounds Module */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
@@ -195,6 +224,25 @@ export default function App() {
             <span className="text-[9px] text-sky-600 font-medium">Shielding</span>
           </div>
 
+          {/* NEW ADAPTABLE CLASS RESOURCE / MP CURRENCY FIELD */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
+            <input 
+              type="text" value={resourceLabel} onChange={(e) => setResourceLabel(e.target.value)}
+              className="text-[10px] bg-transparent font-bold uppercase tracking-wider text-purple-400 text-center focus:outline-none border-b border-transparent hover:border-gray-800 focus:border-purple-600 w-full"
+              placeholder="MP / Resource"
+            />
+            <div className="flex items-center justify-between bg-gray-950 rounded-lg p-1 border border-gray-800 my-1">
+              <button type="button" onClick={() => setCurrentResource(Math.max(0, currentResource - 1))} className="text-xs font-black text-purple-400 hover:text-purple-300 px-1">-</button>
+              <div className="flex items-center justify-center font-mono text-xs font-black text-white w-full">
+                <span>{currentResource}</span>
+                <span className="text-gray-600 mx-0.5">/</span>
+                <input type="number" value={maxResource} onChange={(e) => setMaxResource(Number(e.target.value))} className="w-6 bg-transparent text-center text-gray-400 text-xs focus:outline-none font-bold" />
+              </div>
+              <button type="button" onClick={() => setCurrentResource(Math.min(maxResource, currentResource + 1))} className="text-xs font-black text-purple-400 hover:text-purple-300 px-1">+</button>
+            </div>
+            <span className="text-[9px] text-purple-600 font-medium">Class Drive</span>
+          </div>
+
           {/* Base AC Card */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Base AC</span>
@@ -202,7 +250,7 @@ export default function App() {
             <span className="text-[9px] text-gray-600 font-medium">Static Armor</span>
           </div>
 
-          {/* UPDATED: TEMP AC Card */}
+          {/* Temp AC Card */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center flex flex-col justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Temp AC</span>
             <div className="flex items-center justify-between bg-gray-950 rounded-lg p-1 border border-gray-800 my-1">
@@ -213,7 +261,7 @@ export default function App() {
             <span className="text-[9px] text-teal-600 font-medium">Deflections</span>
           </div>
 
-          {/* UPDATED: INTERACTIVE TOTAL AC OVERRIDE */}
+          {/* INTERACTIVE TOTAL AC OVERRIDE */}
           <div className={`border rounded-xl p-3 text-center flex flex-col justify-between transition-all col-span-2 sm:col-span-1 ${isPurgedActive ? 'bg-red-950/40 border-red-500 animate-pulse' : 'bg-emerald-950/20 border-emerald-800'}`}>
             <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 block">Total AC</span>
             <div className="flex items-center justify-between bg-gray-950/80 rounded-lg p-1 border border-gray-800/80 my-1">
@@ -222,7 +270,7 @@ export default function App() {
               <button type="button" onClick={() => setTotalAcMod(totalAcMod + 1)} className="text-xs font-black text-gray-500 hover:text-white px-1.5" title="Raise total AC modifier">+</button>
             </div>
             <span className="text-[8px] font-bold tracking-tight block text-gray-500 uppercase">
-              {totalAcMod !== 0 ? `Level Mod: ${totalAcMod >= 0 ? '+' : ''}${totalAcMod}` : (isPurgedActive ? '⚠️ PURGED' : 'Live AC')}
+              {totalAcMod !== 0 ? `Level Mod: ${totalAcMod >= 0 ? '+' : ''}${totalAcMod}` : (isPurgedActive ? '⚠️ PURGED (-2)' : 'Live AC')}
             </span>
           </div>
 
@@ -245,7 +293,7 @@ export default function App() {
           {/* MAIN INTERACTION BLOCK (LEFT/CENTER) */}
           <div className="lg:col-span-2 space-y-5">
             
-            {/* UPDATED: FULLY DECOUPLED ATTRIBUTE NODES GRID */}
+            {/* CORE STATS ARRAY */}
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg space-y-3">
               <div className="flex justify-between items-center border-b border-gray-800 pb-2">
                 <h3 className="text-xs font-black uppercase tracking-wider text-gray-400">📊 Core Stats Array (0-5 Cap)</h3>
@@ -265,7 +313,6 @@ export default function App() {
                     <div key={statName} className={`border rounded-xl p-2 text-center flex flex-col justify-between min-h-[110px] ${themeStyles}`}>
                       <span className="text-[10px] font-black text-gray-500 uppercase tracking-tight block">{statName}</span>
                       
-                      {/* Independent Stepper Control Block for Value Tracking */}
                       <div className="flex items-center justify-between bg-gray-900/60 rounded-lg p-1 border border-gray-800/80 my-1 mx-auto w-full max-w-[70px]">
                         <button 
                           type="button" 
@@ -286,7 +333,6 @@ export default function App() {
                         >+</button>
                       </div>
                       
-                      {/* Isolated Passive Status Trigger Toggles */}
                       <button
                         type="button"
                         onClick={() => {
@@ -309,14 +355,14 @@ export default function App() {
               </div>
             </div>
 
-            {/* STATUS INFLICT ARRAY CONFIG */}
+            {/* SEPARATED BLOCK 1: ISOLATED BATTLE ACTION MODIFIERS */}
             <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-lg">
-              <div className="bg-gray-950 px-4 py-2.5 border-b border-gray-800 flex justify-between items-center">
-                <h3 className="text-xs font-black uppercase tracking-wider text-gray-400">⚡ Battle Action Modifiers & Conditions</h3>
+              <div className="bg-gray-950 px-4 py-2.5 border-b border-gray-800">
+                <h3 className="text-xs font-black uppercase tracking-wider text-emerald-400">⚡ Combat Turn Actions & Multipliers</h3>
               </div>
-              <div className="divide-y divide-gray-800/60">
+              <div className="divide-y divide-gray-800/60 p-2 space-y-1">
                 {actionRows.map((row, index) => (
-                  <div key={index} className={`p-2.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 transition-colors ${row.active ? 'bg-gray-950/30' : ''}`}>
+                  <div key={index} className="p-2 flex items-center justify-between gap-3 bg-gray-950/40 rounded-xl border border-gray-850">
                     <div className="flex items-center gap-3">
                       <input 
                         type="number" value={row.val} onChange={(e) => {
@@ -324,24 +370,71 @@ export default function App() {
                           updated[index].val = Number(e.target.value);
                           setActionRows(updated);
                         }}
-                        className="w-12 bg-gray-950 border border-gray-800 rounded-lg py-0.5 text-center font-black text-sm text-emerald-400 focus:outline-none focus:border-emerald-600"
+                        className="w-12 bg-gray-950 border border-gray-800 rounded-lg py-1 text-center font-black text-sm text-emerald-400 focus:outline-none"
                       />
-                      <span className={`text-xs font-bold ${row.active ? 'text-white' : 'text-gray-400'}`}>{row.label}</span>
+                      <span className="text-xs font-bold text-gray-300">{row.label}</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-gray-600 uppercase tracking-wider">Value Multiplier</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* SEPARATED BLOCK 2: NEW STATUS EFFECTS ENGAGEMENT MATRIX (Data from image_7b5eb5.png) */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-lg">
+              <div className="bg-gray-950 px-4 py-2.5 border-b border-gray-800 flex justify-between items-center">
+                <h3 className="text-xs font-black uppercase tracking-wider text-rose-400">⚠️ Active Combat Status Conditions</h3>
+                <span className="text-[9px] text-gray-500 font-mono">Reference Matrix: image_7b5eb5.png</span>
+              </div>
+              <div className="divide-y divide-gray-800/60 p-2 space-y-1.5">
+                {statusEffects.map((effect, idx) => (
+                  <div 
+                    key={effect.name} 
+                    className={`p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all ${
+                      effect.active 
+                        ? 'bg-gray-950 border-rose-900/60 shadow-md' 
+                        : 'bg-gray-900/30 border-gray-800/50 opacity-60'
+                    }`}
+                  >
+                    {/* Status Label & Resistance Check Details */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 max-w-md">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black text-white tracking-wide w-20">{effect.name}</span>
+                        <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border tracking-tight ${effect.color}`}>
+                          {effect.check}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-400 leading-normal pl-0 sm:pl-2 border-l-0 sm:border-l border-gray-800">
+                        {effect.effect}
+                      </p>
                     </div>
 
-                    <div className="flex items-center justify-between sm:justify-end gap-3">
-                      <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border tracking-wider text-center min-w-[75px] ${row.badgeColor}`}>{row.status}</span>
+                    {/* Operational Trigger & Round Counter Layout */}
+                    <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-gray-850 pt-2 sm:pt-0">
+                      {/* Active Duration Stepper Counter Deck */}
+                      <div className="flex flex-col items-center">
+                        <span className="text-[8px] uppercase tracking-wider text-gray-500 font-bold mb-0.5">Turns</span>
+                        <div className="flex items-center bg-gray-950 border border-gray-800 rounded-lg px-1 py-0.5">
+                          <button type="button" onClick={() => handleDurationChange(idx, -1)} className="text-[10px] font-black text-gray-500 hover:text-white px-1">-</button>
+                          <span className="text-xs font-mono font-black px-1 text-amber-400 min-w-[12px] text-center">{effect.duration}</span>
+                          <button type="button" onClick={() => handleDurationChange(idx, 1)} className="text-[10px] font-black text-gray-500 hover:text-white px-1">+</button>
+                        </div>
+                      </div>
+
+                      {/* Active State Toggle Button */}
                       <button
-                        type="button" onClick={() => {
-                          const updated = [...actionRows];
-                          updated[index].active = !updated[index].active;
-                          setActionRows(updated);
-                        }}
-                        className={`text-xs font-bold px-3 py-1 rounded-xl border w-24 text-center transition ${row.active ? 'bg-red-950/50 text-red-400 border-red-500 font-black' : 'bg-gray-950 text-gray-500 border-gray-800'}`}
+                        type="button"
+                        onClick={() => toggleStatusEffect(idx)}
+                        className={`text-xs font-black px-3 py-1.5 rounded-xl border w-24 text-center transition ${
+                          effect.active 
+                            ? 'bg-rose-950/50 text-rose-400 border-rose-600 shadow-inner' 
+                            : 'bg-gray-950 text-gray-600 border-gray-850 hover:text-gray-400'
+                        }`}
                       >
-                        {row.active ? '🔴 ACTIVE' : 'Inactive'}
+                        {effect.active ? '🔴 AFFLICTED' : 'Clear'}
                       </button>
                     </div>
+
                   </div>
                 ))}
               </div>
@@ -370,7 +463,7 @@ export default function App() {
 
           </div>
 
-          {/* SIDEBAR OPERATIONAL INFORMATION CONSOLE (RIGHT 1 COLUMN) */}
+          {/* SIDEBAR OPERATIONAL INFORMATION CONSOLE */}
           <div className="space-y-5">
             
             {/* MUTABLE DYNAMIC ROLLERS CONTAINER */}
@@ -444,7 +537,6 @@ export default function App() {
                           type="button" 
                           onClick={() => rollItemDie(item.name, item.die)}
                           className="bg-blue-950 border border-blue-800 hover:border-blue-700 text-[10px] font-black uppercase text-blue-400 px-2 py-0.5 rounded shadow-sm tracking-wide transition active:scale-90"
-                          title="Click to roll this weapon/armor asset die!"
                         >
                           🎲 {item.die}
                         </button>
@@ -453,17 +545,6 @@ export default function App() {
                     </div>
                   ))
                 )}
-              </div>
-            </div>
-
-            {/* CLASS TRAIT MECHANICS CARD */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg space-y-2">
-              <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 border-b border-gray-800 pb-1.5">🛡️ Active Archetype Blueprint</h3>
-              <div className="text-[11px] text-gray-400 leading-relaxed space-y-2">
-                <div>
-                  <h4 className="font-bold text-emerald-400">Class Signature Asset</h4>
-                  <p className="mt-0.5">Your primary class driver is configured to <span className="text-white font-semibold">{CLASS_DATA[classSelection].stat}</span> tracking rules. Status triggers are bound to active condition toggles.</p>
-                </div>
               </div>
             </div>
 
